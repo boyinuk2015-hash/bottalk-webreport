@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useCallback } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import * as XLSX from "xlsx";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 // Default reference data (replaced when user uploads machine info file)
@@ -202,18 +203,7 @@ function PhotoCell({ url, label }) {
 
 // ── Export ranking data to Excel ─────────────────────────────────────────────
 async function exportRankingExcel(rankData, months, rentMap, locMap, install, elapsed, lastDays, ml) {
-  // Load SheetJS if not already loaded
-  if (!window.XLSX) {
-    await new Promise((res, rej) => {
-      if (document.querySelector("#xlsx-script")) { res(); return; }
-      const s = document.createElement("script");
-      s.id = "xlsx-script";
-      s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
-      s.onload = res; s.onerror = () => rej(new Error("โหลด SheetJS ไม่สำเร็จ"));
-      document.head.appendChild(s);
-    });
-  }
-  const XLSX = window.XLSX;
+  // SheetJS is bundled with the app (imported at module scope)
   const lastM = months[months.length - 1];
   const isLastOpen = elapsed < lastDays;
 
@@ -332,21 +322,10 @@ export default function App() {
         const parsed = parseCSV(text);
         setData(parsed); setFname(file.name); setSelDev(Object.keys(parsed).sort()[0]); setView("overview");
       } else if (ext==="xlsx"||ext==="xls") {
-        // Load SheetJS lazily
-        if (!window.XLSX) {
-          await new Promise((res,rej)=>{
-            if (document.querySelector("#xlsx-script")) { res(); return; }
-            const s = document.createElement("script");
-            s.id = "xlsx-script";
-            s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
-            s.onload = res; s.onerror = ()=>rej(new Error("โหลด SheetJS ไม่สำเร็จ — ลอง Export เป็น CSV แทน"));
-            document.head.appendChild(s);
-          });
-        }
         const buf = await file.arrayBuffer();
-        const wb  = window.XLSX.read(buf,{type:"array"});
+        const wb  = XLSX.read(buf,{type:"array"});
         const ws  = wb.Sheets[wb.SheetNames[0]];
-        const rows = window.XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
+        const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
         let hi=-1;
         for(let i=0;i<Math.min(15,rows.length);i++){
           const r=rows[i].map(c=>String(c).toLowerCase());
@@ -399,20 +378,10 @@ export default function App() {
         const text = await file.text();
         rows = text.trim().split("\n").map(l => l.split(",").map(c => c.replace(/"/g,"").trim()));
       } else if (ext === "xlsx" || ext === "xls") {
-        if (!window.XLSX) {
-          await new Promise((res,rej) => {
-            if (document.querySelector("#xlsx-script")) { res(); return; }
-            const s = document.createElement("script");
-            s.id = "xlsx-script";
-            s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
-            s.onload = res; s.onerror = () => rej(new Error("โหลด SheetJS ไม่สำเร็จ"));
-            document.head.appendChild(s);
-          });
-        }
         const buf = await file.arrayBuffer();
-        const wb = window.XLSX.read(buf, {type:"array", cellDates:false});
+        const wb = XLSX.read(buf, {type:"array", cellDates:false});
         const ws = wb.Sheets[wb.SheetNames[0]];
-        rows = window.XLSX.utils.sheet_to_json(ws, {header:1, defval:""});
+        rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:""});
       } else {
         throw new Error("รองรับเฉพาะ .xlsx, .xls, .csv");
       }
