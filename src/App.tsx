@@ -97,10 +97,10 @@ const INIT_DATA = {"IG01690001":{"2026-01":{"total":113,"count":35,"cash":102,"q
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const THAI_M = ["","ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
-const MCOLS  = ["#3b82f6","#2dd4bf","#f59e0b","#a78bfa","#fb923c","#34d399"];
-const BG     = "#141b2d";
-const CARD   = "#1e2a3a";
-const BORDER = "#2d3f55";
+const MCOLS  = ["#3b82f6","#0d9488","#f59e0b","#a78bfa","#fb923c","#34d399"];
+const BG     = "#ffffff";
+const CARD   = "#ffffff";
+const BORDER = "#d8e0e8";
 
 const ml = m => { const [y,mo]=m.split("-"); return `${THAI_M[+mo]} ${String(+y+543).slice(-2)}`; };
 const fmt = n => Math.round(n||0).toLocaleString("th-TH");
@@ -108,7 +108,7 @@ const getMonths = data => [...new Set(Object.values(data).flatMap(d=>Object.keys
 
 function Trend({ t, v }) {
   if (!t||t==="none"||!v) return null;
-  if (t==="up")   return <span style={{color:"#2dd4bf",fontSize:11}}>▲</span>;
+  if (t==="up")   return <span style={{color:"#0d9488",fontSize:11}}>▲</span>;
   if (t==="down") return <span style={{color:"#ef4444",fontSize:11}}>▼</span>;
   if (t==="new")  return <span style={{color:"#60a5fa",fontSize:9,fontWeight:700}}>NEW</span>;
   return null;
@@ -162,10 +162,10 @@ function MapModal({ item, onClose }) {
   const osmSrc = `https://www.openstreetmap.org/export/embed.html?layer=mapnik&query=${q}`;
   return (
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:99999,display:"flex",alignItems:"center",justifyContent:"center",padding:12}}>
-      <div onClick={e=>e.stopPropagation()} style={{background:"#1e2a3a",border:"1px solid #2d3f55",borderRadius:14,width:"min(860px,96vw)",height:"80vh",display:"flex",flexDirection:"column",boxShadow:"0 8px 48px rgba(0,0,0,0.7)"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 16px",borderBottom:"1px solid #2d3f55",flexShrink:0}}>
-          <span style={{fontWeight:700,color:"#e2eaf4",fontSize:14}}>📍 {item.label}</span>
-          <button onClick={onClose} style={{background:"rgba(255,255,255,0.07)",border:"1px solid #2d3f55",color:"#a8bdd0",fontSize:16,cursor:"pointer",borderRadius:7,width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+      <div onClick={e=>e.stopPropagation()} style={{background:"#ffffff",border:"1px solid #d8e0e8",borderRadius:14,width:"min(860px,96vw)",height:"80vh",display:"flex",flexDirection:"column",boxShadow:"0 8px 48px rgba(0,0,0,0.7)"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 16px",borderBottom:"1px solid #d8e0e8",flexShrink:0}}>
+          <span style={{fontWeight:700,color:"#0f1824",fontSize:14}}>📍 {item.label}</span>
+          <button onClick={onClose} style={{background:"rgba(15,24,36,0.04)",border:"1px solid #d8e0e8",color:"#5b7186",fontSize:16,cursor:"pointer",borderRadius:7,width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
         </div>
         <iframe src={osmSrc} style={{flex:1,border:"none",borderRadius:"0 0 14px 14px"}} allowFullScreen loading="lazy"/>
       </div>
@@ -182,18 +182,18 @@ function PhotoCell({ url, label }) {
       onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)}>
       <a href={url} target="_blank" rel="noopener noreferrer"
         style={{display:"inline-flex",alignItems:"center",justifyContent:"center",
-          width:30,height:30,background:show?"rgba(45,212,191,0.1)":"#1a2535",
-          border:`1px solid ${show?"#2dd4bf":"#2d3f55"}`,
+          width:30,height:30,background:show?"rgba(45,212,191,0.1)":"#f1f5f9",
+          border:`1px solid ${show?"#0d9488":"#d8e0e8"}`,
           borderRadius:8,fontSize:16,textDecoration:"none",transition:"all .15s"}}>
         🖼️
       </a>
       {show&&<div style={{position:"absolute",bottom:"calc(100% + 8px)",left:"50%",transform:"translateX(-50%)",
-        background:"#0f1e2e",color:"#c9d8e8",fontSize:11,padding:"5px 10px",borderRadius:8,
+        background:"#f1f5f9",color:"#1e2a3a",fontSize:11,padding:"5px 10px",borderRadius:8,
         whiteSpace:"nowrap",maxWidth:220,textAlign:"center",zIndex:9999,pointerEvents:"none",
         boxShadow:"0 4px 16px rgba(0,0,0,0.3)",lineHeight:1.5}}>
         {label}
         <div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",
-          borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:"5px solid #0f1e2e"}}/>
+          borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:"5px solid #f1f5f9"}}/>
       </div>}
     </div>
   );
@@ -524,14 +524,14 @@ export default function App() {
   const tab = t => ({
     padding:"7px 16px",borderRadius:8,border:"none",cursor:"pointer",
     fontFamily:"inherit",fontWeight:600,fontSize:13,transition:"all .15s",
-    background:view===t?"#2dd4bf":"#232f42",
-    color:view===t?"#fff":"#6b8299",
+    background:view===t?"#0d9488":"#e6ebf1",
+    color:view===t?"#fff":"#64748b",
   });
   const cv = (r,m,showT,isLastOpen) => {
     const actual = r.bm[m]||0;
     const v = isLastOpen ? r.rr : actual;
     const t = r.tr[m];
-    return <td key={m} style={{padding:"8px 9px",textAlign:"right",color:v>0?(isLastOpen?"#fbbf24":"#a8bdd0"):"#2d3f55",whiteSpace:"nowrap"}}>
+    return <td key={m} style={{padding:"8px 9px",textAlign:"right",color:v>0?(isLastOpen?"#fbbf24":"#5b7186"):"#d8e0e8",whiteSpace:"nowrap"}}>
       <span style={{display:"inline-flex",alignItems:"center",gap:3,justifyContent:"flex-end"}}>
         {v>0?`฿${fmt(v)}`:"—"}{showT&&!isLastOpen&&<Trend t={t} v={actual}/>}
       </span>
@@ -540,32 +540,32 @@ export default function App() {
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <div style={{minHeight:"100vh",background:BG,color:"#c9d8e8",fontFamily:"'IBM Plex Sans Thai','Sarabun',sans-serif",padding:"18px 16px"}}>
+    <div style={{minHeight:"100vh",background:BG,color:"#1e2a3a",fontFamily:"'IBM Plex Sans Thai','Sarabun',sans-serif",padding:"18px 16px"}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap');
         html,body{background:${BG}!important;margin:0}
         *{box-sizing:border-box}
         ::-webkit-scrollbar{width:5px;height:5px}
-        ::-webkit-scrollbar-track{background:#0f1623}
-        ::-webkit-scrollbar-thumb{background:#2d3f55;border-radius:3px}
-        .card{background:${CARD};border:1px solid ${BORDER};border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.35)}
+        ::-webkit-scrollbar-track{background:#e2e8f0}
+        ::-webkit-scrollbar-thumb{background:#d8e0e8;border-radius:3px}
+        .card{background:${CARD};border:1px solid ${BORDER};border-radius:14px;padding:16px;box-shadow:0 1px 3px rgba(15,24,36,0.08)}
         .sc{border-radius:12px;padding:14px 18px}
-        select{background:#1e2a3a;color:#c9d8e8;border:1px solid #2d3f55;border-radius:9px;padding:6px 12px;font-size:13px;font-family:inherit;outline:none;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,0.3)}
-        .rr{transition:background .12s;cursor:pointer;border-bottom:1px solid #232f42}
-        .rr:hover td{background:rgba(255,255,255,0.04)}
+        select{background:#ffffff;color:#1e2a3a;border:1px solid #d8e0e8;border-radius:9px;padding:6px 12px;font-size:13px;font-family:inherit;outline:none;cursor:pointer;box-shadow:0 1px 2px rgba(15,24,36,0.08)}
+        .rr{transition:background .12s;cursor:pointer;border-bottom:1px solid #e6ebf1}
+        .rr:hover td{background:rgba(13,148,136,0.06)}
         .rr-low{background:rgba(220,38,38,0.08)}
         .rr-low:hover td{background:rgba(220,38,38,0.13)!important}
-        .rr-sel{background:rgba(13,148,136,0.1);box-shadow:inset 3px 0 0 #2dd4bf}
-        .dz{border:2px dashed #2d3f55;border-radius:10px;padding:7px 13px;cursor:pointer;transition:all .18s;background:#1e2a3a;display:inline-flex;align-items:center;gap:8px}
-        .dz:hover,.dz.drag{border-color:#2dd4bf;background:rgba(45,212,191,0.07)}
+        .rr-sel{background:rgba(13,148,136,0.1);box-shadow:inset 3px 0 0 #0d9488}
+        .dz{border:2px dashed #d8e0e8;border-radius:10px;padding:7px 13px;cursor:pointer;transition:all .18s;background:#ffffff;display:inline-flex;align-items:center;gap:8px}
+        .dz:hover,.dz.drag{border-color:#0d9488;background:rgba(45,212,191,0.07)}
         .tip-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center}
       `}</style>
 
       {/* Header */}
       <div style={{marginBottom:18,display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
         <div>
-          <h1 style={{margin:"0 0 3px",fontSize:21,fontWeight:700,color:"#e8f0fa"}}>วิเคราะห์รายได้ตู้กดน้ำ</h1>
-          <p style={{margin:0,color:"#4a6070",fontSize:11}}>{fname?`📊 ${fname}`:"📊 ยังไม่ได้อัปโหลดข้อมูล"} {mfname?`· 🏭 ${mfname}`:""} {months.length>0?`· ${devices.length} เครื่อง · ${ml(months[0])} – ${ml(lastM)}`:""}</p>
+          <h1 style={{margin:"0 0 3px",fontSize:21,fontWeight:700,color:"#0f1824"}}>วิเคราะห์รายได้ตู้กดน้ำ</h1>
+          <p style={{margin:0,color:"#64748b",fontSize:11}}>{fname?`📊 ${fname}`:"📊 ยังไม่ได้อัปโหลดข้อมูล"} {mfname?`· 🏭 ${mfname}`:""} {months.length>0?`· ${devices.length} เครื่อง · ${ml(months[0])} – ${ml(lastM)}`:""}</p>
         </div>
         <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
           {[["overview","ภาพรวม"],["detail","รายเครื่อง"],["ranking","จัดอันดับ"],["decision","สรุปสถานะ"]].map(([t,l])=>(
@@ -581,7 +581,7 @@ export default function App() {
           >
             <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={e=>loadFile(e.target.files[0])}/>
             <span style={{fontSize:14}}>{busy?"⏳":"📊"}</span>
-            <span style={{fontSize:12,color:"#4a6070"}}>{busy?"กำลังโหลด…":"ข้อมูลยอดขาย"}</span>
+            <span style={{fontSize:12,color:"#64748b"}}>{busy?"กำลังโหลด…":"ข้อมูลยอดขาย"}</span>
           </div>
           {/* File 2: machine info (install date + rent) */}
           <div
@@ -590,11 +590,11 @@ export default function App() {
             onDragLeave={()=>setDragM(false)}
             onDrop={e=>{e.preventDefault();setDragM(false);loadMachineFile(e.dataTransfer.files[0]);}}
             onClick={()=>fileRefM.current.click()}
-            style={{borderColor: mfname!=="ข้อมูลตัวอย่าง"?"#2dd4bf":undefined}}
+            style={{borderColor: mfname!=="ข้อมูลตัวอย่าง"?"#0d9488":undefined}}
           >
             <input ref={fileRefM} type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={e=>loadMachineFile(e.target.files[0])}/>
             <span style={{fontSize:14}}>{busyM?"⏳":"🏭"}</span>
-            <span style={{fontSize:12,color: mfname!=="ข้อมูลตัวอย่าง"?"#2dd4bf":"#4a6070"}}>{busyM?"กำลังโหลด…":mfname!=="ข้อมูลตัวอย่าง"?`✓ ${mfname.slice(0,18)}…`:"ข้อมูลเครื่อง"}</span>
+            <span style={{fontSize:12,color: mfname!=="ข้อมูลตัวอย่าง"?"#0d9488":"#64748b"}}>{busyM?"กำลังโหลด…":mfname!=="ข้อมูลตัวอย่าง"?`✓ ${mfname.slice(0,18)}…`:"ข้อมูลเครื่อง"}</span>
           </div>
         </div>
       </div>
@@ -606,28 +606,28 @@ export default function App() {
       {view==="overview"&&<>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(155px,1fr))",gap:10,marginBottom:16}}>
           <div className="sc" style={{background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.25)"}}>
-            <div style={{fontSize:11,color:"#2dd4bf",fontWeight:600,marginBottom:4}}>รายได้รวมทั้งหมด</div>
-            <div style={{fontSize:24,fontWeight:700,color:"#e2eaf4"}}>฿{fmt(grandTotal)}</div>
+            <div style={{fontSize:11,color:"#0d9488",fontWeight:600,marginBottom:4}}>รายได้รวมทั้งหมด</div>
+            <div style={{fontSize:24,fontWeight:700,color:"#0f1824"}}>฿{fmt(grandTotal)}</div>
           </div>
           {ovData.map((m,i)=>(
             <div key={m.month} className="sc" style={{background:"rgba(99,179,237,0.08)",border:"1px solid rgba(99,179,237,0.2)"}}>
               <div style={{fontSize:11,color:MCOLS[i%MCOLS.length],fontWeight:600,marginBottom:4}}>{m.month}</div>
-              <div style={{fontSize:20,fontWeight:700,color:"#e2eaf4"}}>฿{fmt(m.total)}</div>
-              <div style={{fontSize:11,color:"#4a6070",marginTop:2}}>{fmt(m.count)} ครั้ง</div>
+              <div style={{fontSize:20,fontWeight:700,color:"#0f1824"}}>฿{fmt(m.total)}</div>
+              <div style={{fontSize:11,color:"#64748b",marginTop:2}}>{fmt(m.count)} ครั้ง</div>
             </div>
           ))}
         </div>
 
         <div className="card" style={{marginBottom:14}}>
-          <div style={{fontSize:13,color:"#8aaac0",fontWeight:600,marginBottom:12}}>รายได้รวมทุกเครื่อง แยกตามเดือน</div>
+          <div style={{fontSize:13,color:"#5b7186",fontWeight:600,marginBottom:12}}>รายได้รวมทุกเครื่อง แยกตามเดือน</div>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={ovData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e2a3a"/>
-              <XAxis dataKey="month" tick={{fill:"#4a6070",fontSize:12}}/>
-              <YAxis tick={{fill:"#4a6070",fontSize:11}} tickFormatter={v=>`฿${(v/1000).toFixed(0)}k`}/>
-              <Tooltip contentStyle={{background:"#fff",border:"1px solid #e2e8f0",borderRadius:9,color:"#c9d8e8"}} formatter={(v,n)=>[`฿${fmt(v)}`,n==="cash"?"เงินสด":"QR"]}/>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff"/>
+              <XAxis dataKey="month" tick={{fill:"#64748b",fontSize:12}}/>
+              <YAxis tick={{fill:"#64748b",fontSize:11}} tickFormatter={v=>`฿${(v/1000).toFixed(0)}k`}/>
+              <Tooltip contentStyle={{background:"#fff",border:"1px solid #e2e8f0",borderRadius:9,color:"#1e2a3a"}} formatter={(v,n)=>[`฿${fmt(v)}`,n==="cash"?"เงินสด":"QR"]}/>
               <Legend formatter={v=>v==="cash"?"เงินสด":"QR"}/>
-              <Bar dataKey="cash" stackId="a" fill="#2dd4bf"/>
+              <Bar dataKey="cash" stackId="a" fill="#0d9488"/>
               <Bar dataKey="qr"   stackId="a" fill="#3b82f6" radius={[5,5,0,0]}/>
             </BarChart>
           </ResponsiveContainer>
@@ -635,10 +635,10 @@ export default function App() {
 
         <div className="card">
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
-            <div style={{fontSize:13,color:"#8aaac0",fontWeight:600}}>รายได้ต่อเครื่อง แบ่งตามเดือน</div>
+            <div style={{fontSize:13,color:"#5b7186",fontWeight:600}}>รายได้ต่อเครื่อง แบ่งตามเดือน</div>
             <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
               {months.map((m,i)=>(
-                <span key={m} style={{fontSize:11,color:"#4a6070",display:"flex",alignItems:"center",gap:4}}>
+                <span key={m} style={{fontSize:11,color:"#64748b",display:"flex",alignItems:"center",gap:4}}>
                   <span style={{width:10,height:10,borderRadius:3,background:MCOLS[i%MCOLS.length],display:"inline-block"}}/>{ml(m)}
                 </span>
               ))}
@@ -646,10 +646,10 @@ export default function App() {
           </div>
           <ResponsiveContainer width="100%" height={Math.max(280,devices.length*17)}>
             <BarChart data={stackData} layout="vertical" barSize={9} margin={{left:0,right:14}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e2a3a" horizontal={false}/>
-              <XAxis type="number" tick={{fill:"#4a6070",fontSize:10}} tickFormatter={v=>`฿${v}`}/>
-              <YAxis type="category" dataKey="device" width={110} tick={{fill:"#6b8299",fontSize:10}}/>
-              <Tooltip contentStyle={{background:"#fff",border:"1px solid #e2e8f0",borderRadius:9,color:"#c9d8e8"}} formatter={(v,n)=>v>0?[`฿${fmt(v)}`,n]:null} labelFormatter={l=>`เครื่อง ${l}`}/>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" horizontal={false}/>
+              <XAxis type="number" tick={{fill:"#64748b",fontSize:10}} tickFormatter={v=>`฿${v}`}/>
+              <YAxis type="category" dataKey="device" width={110} tick={{fill:"#64748b",fontSize:10}}/>
+              <Tooltip contentStyle={{background:"#fff",border:"1px solid #e2e8f0",borderRadius:9,color:"#1e2a3a"}} formatter={(v,n)=>v>0?[`฿${fmt(v)}`,n]:null} labelFormatter={l=>`เครื่อง ${l}`}/>
               {months.map((m,i)=>(
                 <Bar key={m} dataKey={ml(m)} stackId="a" fill={MCOLS[i%MCOLS.length]} radius={i===months.length-1?[0,4,4,0]:[0,0,0,0]}/>
               ))}
@@ -661,59 +661,59 @@ export default function App() {
       {/* ── DETAIL ── */}
       {view==="detail"&&<>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14,flexWrap:"wrap"}}>
-          <label style={{fontSize:13,color:"#6b8299"}}>เลือกเครื่อง:</label>
+          <label style={{fontSize:13,color:"#64748b"}}>เลือกเครื่อง:</label>
           <select value={selDev} onChange={e=>setSelDev(e.target.value)}>
             {devices.map(d=><option key={d} value={d}>{d}</option>)}
           </select>
-          <div style={{background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.25)",borderRadius:8,padding:"5px 12px",fontSize:13,color:"#2dd4bf"}}>
+          <div style={{background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.25)",borderRadius:8,padding:"5px 12px",fontSize:13,color:"#0d9488"}}>
             รายได้รวม ฿{fmt(devData.reduce((s,r)=>s+r.total,0))}
           </div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(145px,1fr))",gap:10,marginBottom:14}}>
           {devData.map(m=>(
             <div key={m.month} className="sc" style={{background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.25)"}}>
-              <div style={{fontSize:11,color:"#2dd4bf",fontWeight:600,marginBottom:4}}>{m.month}</div>
-              <div style={{fontSize:20,fontWeight:700,color:"#e2eaf4"}}>฿{fmt(m.total)}</div>
-              <div style={{fontSize:11,color:"#4a6070",marginTop:2}}>{fmt(m.count)} ครั้ง</div>
-              <div style={{fontSize:10,color:"#6b8299",marginTop:1}}>เงินสด ฿{fmt(m.cash)} / QR ฿{fmt(m.qr)}</div>
+              <div style={{fontSize:11,color:"#0d9488",fontWeight:600,marginBottom:4}}>{m.month}</div>
+              <div style={{fontSize:20,fontWeight:700,color:"#0f1824"}}>฿{fmt(m.total)}</div>
+              <div style={{fontSize:11,color:"#64748b",marginTop:2}}>{fmt(m.count)} ครั้ง</div>
+              <div style={{fontSize:10,color:"#64748b",marginTop:1}}>เงินสด ฿{fmt(m.cash)} / QR ฿{fmt(m.qr)}</div>
             </div>
           ))}
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}>
           <div className="card">
-            <div style={{fontSize:13,color:"#8aaac0",fontWeight:600,marginBottom:10}}>รายได้รายเดือน</div>
+            <div style={{fontSize:13,color:"#5b7186",fontWeight:600,marginBottom:10}}>รายได้รายเดือน</div>
             <ResponsiveContainer width="100%" height={190}>
               <BarChart data={devData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e2a3a"/>
-                <XAxis dataKey="month" tick={{fill:"#4a6070",fontSize:11}}/>
-                <YAxis tick={{fill:"#4a6070",fontSize:11}}/>
-                <Tooltip contentStyle={{background:"#fff",border:"1px solid #e2e8f0",borderRadius:9,color:"#c9d8e8"}} formatter={(v,n)=>[`฿${fmt(v)}`,n==="cash"?"เงินสด":"QR"]}/>
-                <Bar dataKey="cash" stackId="a" fill="#2dd4bf" name="cash"/>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff"/>
+                <XAxis dataKey="month" tick={{fill:"#64748b",fontSize:11}}/>
+                <YAxis tick={{fill:"#64748b",fontSize:11}}/>
+                <Tooltip contentStyle={{background:"#fff",border:"1px solid #e2e8f0",borderRadius:9,color:"#1e2a3a"}} formatter={(v,n)=>[`฿${fmt(v)}`,n==="cash"?"เงินสด":"QR"]}/>
+                <Bar dataKey="cash" stackId="a" fill="#0d9488" name="cash"/>
                 <Bar dataKey="qr"   stackId="a" fill="#3b82f6" radius={[5,5,0,0]} name="qr"/>
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="card">
-            <div style={{fontSize:13,color:"#8aaac0",fontWeight:600,marginBottom:10}}>สัดส่วนชำระ</div>
+            <div style={{fontSize:13,color:"#5b7186",fontWeight:600,marginBottom:10}}>สัดส่วนชำระ</div>
             <ResponsiveContainer width="100%" height={170}>
               <PieChart>
                 <Pie data={pieData} cx="50%" cy="50%" innerRadius={42} outerRadius={66} dataKey="value" paddingAngle={3}>
-                  {pieData.map((_,i)=><Cell key={i} fill={i===0?"#2dd4bf":"#3b82f6"}/>)}
+                  {pieData.map((_,i)=><Cell key={i} fill={i===0?"#0d9488":"#3b82f6"}/>)}
                 </Pie>
-                <Tooltip contentStyle={{background:"#fff",border:"1px solid #e2e8f0",borderRadius:9,color:"#c9d8e8"}} formatter={v=>`฿${fmt(v)}`}/>
+                <Tooltip contentStyle={{background:"#fff",border:"1px solid #e2e8f0",borderRadius:9,color:"#1e2a3a"}} formatter={v=>`฿${fmt(v)}`}/>
                 <Legend/>
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
         <div className="card">
-          <div style={{fontSize:13,color:"#8aaac0",fontWeight:600,marginBottom:10}}>จำนวนครั้งต่อเดือน</div>
+          <div style={{fontSize:13,color:"#5b7186",fontWeight:600,marginBottom:10}}>จำนวนครั้งต่อเดือน</div>
           <ResponsiveContainer width="100%" height={150}>
             <LineChart data={devData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e2a3a"/>
-              <XAxis dataKey="month" tick={{fill:"#4a6070",fontSize:11}}/>
-              <YAxis tick={{fill:"#4a6070",fontSize:11}}/>
-              <Tooltip contentStyle={{background:"#fff",border:"1px solid #e2e8f0",borderRadius:9,color:"#c9d8e8"}}/>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff"/>
+              <XAxis dataKey="month" tick={{fill:"#64748b",fontSize:11}}/>
+              <YAxis tick={{fill:"#64748b",fontSize:11}}/>
+              <Tooltip contentStyle={{background:"#fff",border:"1px solid #e2e8f0",borderRadius:9,color:"#1e2a3a"}}/>
               <Line type="monotone" dataKey="count" stroke="#a78bfa" strokeWidth={2} dot={{r:4,fill:"#a78bfa"}} name="ครั้ง"/>
             </LineChart>
           </ResponsiveContainer>
@@ -725,11 +725,11 @@ export default function App() {
         <div className="card">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10,flexWrap:"wrap",gap:8}}>
             <div>
-              <div style={{fontSize:13,color:"#8aaac0",fontWeight:600}}>จัดอันดับรายได้ทุกเครื่อง</div>
-              <div style={{fontSize:11,color:"#4a6070",marginTop:2}}>รวม ฿{fmt(grandTotal)} · {rankData.length} เครื่อง</div>
+              <div style={{fontSize:13,color:"#5b7186",fontWeight:600}}>จัดอันดับรายได้ทุกเครื่อง</div>
+              <div style={{fontSize:11,color:"#64748b",marginTop:2}}>รวม ฿{fmt(grandTotal)} · {rankData.length} เครื่อง</div>
             </div>
-            <div style={{display:"flex",flexWrap:"wrap",gap:8,fontSize:11,color:"#4a6070",alignItems:"center"}}>
-              <span><span style={{color:"#2dd4bf"}}>▲</span> ขึ้น</span>
+            <div style={{display:"flex",flexWrap:"wrap",gap:8,fontSize:11,color:"#64748b",alignItems:"center"}}>
+              <span><span style={{color:"#0d9488"}}>▲</span> ขึ้น</span>
               <span><span style={{color:"#ef4444"}}>▼</span> ลง</span>
               <span style={{background:"rgba(220,38,38,0.12)",border:"1px solid rgba(220,38,38,0.3)",borderRadius:6,padding:"2px 8px",color:"#f87171"}}>แดง = AVG &lt; ค่าเช่า (เฉพาะ ≥2 เดือน)</span>
               <button
@@ -743,7 +743,7 @@ export default function App() {
                 style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 12px",
                   borderRadius:8,border:"1px solid rgba(45,212,191,0.4)",
                   background:exporting?"rgba(45,212,191,0.05)":"rgba(45,212,191,0.1)",
-                  color:exporting||!rankData.length?"#4a6070":"#2dd4bf",
+                  color:exporting||!rankData.length?"#64748b":"#0d9488",
                   cursor:exporting||!rankData.length?"not-allowed":"pointer",
                   fontSize:11,fontWeight:600,fontFamily:"inherit",transition:"all .15s"}}>
                 {exporting?"⏳ กำลัง export...":"📥 Export Excel"}
@@ -753,7 +753,7 @@ export default function App() {
           <div style={{overflowX:"auto",overflowY:"auto",maxHeight:"68vh"}}>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
               <thead>
-                <tr style={{borderBottom:"2px solid #2d3f55"}}>
+                <tr style={{borderBottom:"2px solid #d8e0e8"}}>
                   {(()=>{
                     const sortable = [
                       {key:"#",     label:"#",         col:null,     align:"left"},
@@ -775,11 +775,11 @@ export default function App() {
                       return (
                         <th key={key}
                           onClick={col?()=>setRankSort(s=>s.col===col?{col,dir:s.dir==="desc"?"asc":"desc"}:{col,dir:"desc"}):undefined}
-                          style={{padding:"7px 9px",textAlign:align,color:active?"#2dd4bf":"#6b8299",fontWeight:600,
+                          style={{padding:"7px 9px",textAlign:align,color:active?"#0d9488":"#64748b",fontWeight:600,
                             whiteSpace:"nowrap",cursor:col?"pointer":"default",userSelect:"none",
                             position:"sticky",top:0,zIndex:2,
-                            background:active?"#1a2d3a":"#1e2a3a",
-                            boxShadow:"0 2px 0 #2d3f55",
+                            background:active?"#e8edf2":"#ffffff",
+                            boxShadow:"0 2px 0 #d8e0e8",
                             transition:"color .15s"}}>
                           {label}{col&&<span style={{marginLeft:3,fontSize:9,opacity:active?1:0.4}}>{arrow}</span>}
                         </th>
@@ -796,13 +796,13 @@ export default function App() {
                   return (
                     <React.Fragment key={r.device}>
                     {showDivider && (
-                      <tr key="__divider__"><td colSpan={99} style={{padding:"6px 10px",background:"#1a2535",fontSize:10,color:"#4a6070",fontStyle:"italic",borderBottom:"1px solid #232f42"}}>
+                      <tr key="__divider__"><td colSpan={99} style={{padding:"6px 10px",background:"#f1f5f9",fontSize:10,color:"#64748b",fontStyle:"italic",borderBottom:"1px solid #e6ebf1"}}>
                         ── ติดตั้งน้อยกว่า 2 เดือน (ยังไม่นำมาประเมิน) ──
                       </td></tr>
                     )}
                     <tr className={`rr${isSel?" rr-sel":isLow?" rr-low":""}`}>
-                      <td style={{padding:"7px 9px",color:i<3?"#2dd4bf":"#4a6070",fontWeight:700}}>#{i+1}</td>
-                      <td style={{padding:"7px 9px",fontWeight:600,color:isSel?"#2dd4bf":isLow?"#f87171":"#c9d8e8",whiteSpace:"nowrap"}}>
+                      <td style={{padding:"7px 9px",color:i<3?"#0d9488":"#64748b",fontWeight:700}}>#{i+1}</td>
+                      <td style={{padding:"7px 9px",fontWeight:600,color:isSel?"#0d9488":isLow?"#f87171":"#1e2a3a",whiteSpace:"nowrap"}}>
                         <div style={{display:"flex",alignItems:"center",gap:5}}>
                           {r.device}
                           {!r.mature&&<span style={{fontSize:9,background:"rgba(251,191,36,0.15)",border:"1px solid rgba(251,191,36,0.3)",borderRadius:4,padding:"1px 5px",color:"#fbbf24",fontWeight:500}}>{r.monthsInstalled}M</span>}
@@ -819,42 +819,42 @@ export default function App() {
                               setCopied(r.device); setTimeout(()=>setCopied(""),1500);
                             }}
                             title="คัดลอกหมายเลขเครื่อง"
-                            style={{padding:"2px 7px",fontSize:11,borderRadius:5,border:"1px solid #2d3f55",background:copied===r.device?"rgba(45,212,191,0.15)":"rgba(255,255,255,0.04)",color:copied===r.device?"#2dd4bf":"#6b8299",cursor:"pointer",fontFamily:"inherit",lineHeight:1.5,transition:"all .15s",flexShrink:0}}>
+                            style={{padding:"2px 7px",fontSize:11,borderRadius:5,border:"1px solid #d8e0e8",background:copied===r.device?"rgba(45,212,191,0.15)":"rgba(15,24,36,0.03)",color:copied===r.device?"#0d9488":"#64748b",cursor:"pointer",fontFamily:"inherit",lineHeight:1.5,transition:"all .15s",flexShrink:0}}>
                             {copied===r.device?"✓":"⎘"}
                           </button>
                         </div>
                       </td>
-                      <td style={{padding:"7px 9px",color:"#a8bdd0",maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={locMap[r.device]||""}>
-                        {locMap[r.device]||<span style={{color:"#2d3f55"}}>—</span>}
+                      <td style={{padding:"7px 9px",color:"#5b7186",maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={locMap[r.device]||""}>
+                        {locMap[r.device]||<span style={{color:"#d8e0e8"}}>—</span>}
                       </td>
-                      <td style={{padding:"7px 9px",textAlign:"center",color:"#4a6070",whiteSpace:"nowrap"}}>{install[r.device]||"—"}</td>
+                      <td style={{padding:"7px 9px",textAlign:"center",color:"#64748b",whiteSpace:"nowrap"}}>{install[r.device]||"—"}</td>
                       <td style={{padding:"7px 9px",textAlign:"right",color:"#f59e0b",whiteSpace:"nowrap"}}>฿{fmt(rentMap[r.device]||0)}</td>
                       {months.map((m,mi)=>cv(r,m,mi>0, mi===months.length-1&&elapsed<lastDays))}
                       <td style={{padding:"7px 9px",textAlign:"right",whiteSpace:"nowrap"}}>
-                        <span style={{color:isLow?"#f87171":r.avg>=(rentMap[r.device]||0)?"#2dd4bf":"#a8bdd0",fontWeight:isLow?700:400}}>฿{fmt(r.avg)}</span>
+                        <span style={{color:isLow?"#f87171":r.avg>=(rentMap[r.device]||0)?"#0d9488":"#5b7186",fontWeight:isLow?700:400}}>฿{fmt(r.avg)}</span>
                       </td>
-                      <td style={{padding:"7px 9px",textAlign:"right",fontWeight:700,color:"#2dd4bf",whiteSpace:"nowrap"}}>฿{fmt(r.total)}</td>
-                      <td style={{padding:"7px 9px",textAlign:"right",color:"#6b8299"}}>{fmt(r.count)}</td>
+                      <td style={{padding:"7px 9px",textAlign:"right",fontWeight:700,color:"#0d9488",whiteSpace:"nowrap"}}>฿{fmt(r.total)}</td>
+                      <td style={{padding:"7px 9px",textAlign:"right",color:"#64748b"}}>{fmt(r.count)}</td>
                       <td style={{padding:"7px 9px",textAlign:"right"}}>
                         <div style={{display:"flex",alignItems:"center",justifyContent:"flex-end",gap:5}}>
-                          <div style={{width:46,height:4,background:"#232f42",borderRadius:3,overflow:"hidden"}}>
-                            <div style={{width:`${Math.min(100,r.total/rankData[0].total*100)}%`,height:"100%",background:isLow?"#ef4444":"#2dd4bf",borderRadius:3}}/>
+                          <div style={{width:46,height:4,background:"#e6ebf1",borderRadius:3,overflow:"hidden"}}>
+                            <div style={{width:`${Math.min(100,r.total/rankData[0].total*100)}%`,height:"100%",background:isLow?"#ef4444":"#0d9488",borderRadius:3}}/>
                           </div>
-                          <span style={{fontSize:10,color:"#6b8299",minWidth:30}}>{(r.total/grandTotal*100).toFixed(1)}%</span>
+                          <span style={{fontSize:10,color:"#64748b",minWidth:30}}>{(r.total/grandTotal*100).toFixed(1)}%</span>
                         </div>
                       </td>
                       <td style={{padding:"7px 9px",textAlign:"center"}}>
                         {photoMap[r.device]
                           ? <PhotoCell url={photoMap[r.device]} label={locMap[r.device]||r.device} />
-                          : <span style={{color:"#2d3f55",fontSize:11}}>—</span>}
+                          : <span style={{color:"#d8e0e8",fontSize:11}}>—</span>}
                       </td>
                       <td style={{padding:"7px 9px",textAlign:"center"}}>
                         {mapUrl[r.device]
                           ? <button onClick={e=>{e.stopPropagation(); setMapModal({label:locMap[r.device]||r.device});}}
-                              style={{display:"inline-flex",alignItems:"center",gap:3,background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.25)",borderRadius:6,padding:"3px 8px",color:"#2dd4bf",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>
+                              style={{display:"inline-flex",alignItems:"center",gap:3,background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.25)",borderRadius:6,padding:"3px 8px",color:"#0d9488",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>
                               📍
                             </button>
-                          : <span style={{color:"#2d3f55",fontSize:11}}>—</span>}
+                          : <span style={{color:"#d8e0e8",fontSize:11}}>—</span>}
                       </td>
                     </tr>
                     </React.Fragment>
@@ -863,7 +863,7 @@ export default function App() {
               </tbody>
             </table>
           </div>
-          <p style={{fontSize:10,color:"#2d3f55",marginTop:8,lineHeight:1.5}}>* = ค่า RunRate (ประมาณการ {elapsed}/{lastDays} วัน) · ตัวเลขสีเหลือง = RunRate · AVG เฉลี่ยทุกเดือน (เดือน * ใช้ RunRate) · แดง = AVG &lt; ค่าเช่า · เรียงตาม AVG มาก→น้อย</p>
+          <p style={{fontSize:10,color:"#d8e0e8",marginTop:8,lineHeight:1.5}}>* = ค่า RunRate (ประมาณการ {elapsed}/{lastDays} วัน) · ตัวเลขสีเหลือง = RunRate · AVG เฉลี่ยทุกเดือน (เดือน * ใช้ RunRate) · แดง = AVG &lt; ค่าเช่า · เรียงตาม AVG มาก→น้อย</p>
         </div>
       )}
 
@@ -872,66 +872,66 @@ export default function App() {
         <div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(145px,1fr))",gap:10,marginBottom:16}}>
             {[
-              {key:"keep",    icon:"✅",label:"วางตู้ต่อ",      color:"#2dd4bf",bg:"rgba(45,212,191,0.07)",  bd:"rgba(45,212,191,0.2)"},
+              {key:"keep",    icon:"✅",label:"วางตู้ต่อ",      color:"#0d9488",bg:"rgba(45,212,191,0.07)",  bd:"rgba(45,212,191,0.2)"},
               {key:"watch",   icon:"👀",label:"เฝ้าดู",          color:"#d97706",bg:"rgba(251,191,36,0.07)",   bd:"rgba(251,191,36,0.2)"},
               {key:"relocate",icon:"🔴",label:"ย้ายออก",      color:"#dc2626",bg:"rgba(220,38,38,0.08)",    bd:"rgba(220,38,38,0.2)"},
-              {key:"nodata",  icon:"⚠️",label:"ตรวจสอบสถานะ",  color:"#6b8299",bg:"rgba(148,163,184,0.07)",bd:"rgba(148,163,184,0.2)"},
+              {key:"nodata",  icon:"⚠️",label:"ตรวจสอบสถานะ",  color:"#64748b",bg:"rgba(148,163,184,0.07)",bd:"rgba(148,163,184,0.2)"},
             ].map(s=>(
               <div key={s.key} className="sc" style={{background:s.bg,border:`1px solid ${s.bd}`}}>
                 <div style={{fontSize:20,marginBottom:5}}>{s.icon}</div>
                 <div style={{fontSize:28,fontWeight:700,color:s.color}}>{grp[s.key].length}</div>
-                <div style={{fontSize:13,color:"#6b8299",marginTop:2}}>{s.label}</div>
-                <div style={{fontSize:10,color:"#6b8299"}}>เครื่อง</div>
+                <div style={{fontSize:13,color:"#64748b",marginTop:2}}>{s.label}</div>
+                <div style={{fontSize:10,color:"#64748b"}}>เครื่อง</div>
               </div>
             ))}
           </div>
 
           <div className="card" style={{marginBottom:12,padding:"11px 14px"}}>
-            <div style={{fontSize:11,color:"#4a6070",fontWeight:600,marginBottom:7}}>เกณฑ์การตัดสิน</div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(195px,1fr))",gap:5,fontSize:11,color:"#4a6070"}}>
-              <span>✅ <b style={{color:"#2dd4bf"}}>วางตู้ต่อ</b> — Run Rate ≥ ค่าเช่า และ AVG ≥ 80%</span>
+            <div style={{fontSize:11,color:"#64748b",fontWeight:600,marginBottom:7}}>เกณฑ์การตัดสิน</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(195px,1fr))",gap:5,fontSize:11,color:"#64748b"}}>
+              <span>✅ <b style={{color:"#0d9488"}}>วางตู้ต่อ</b> — Run Rate ≥ ค่าเช่า และ AVG ≥ 80%</span>
               <span>👀 <b style={{color:"#f59e0b"}}>เฝ้าดู</b> — ผ่านเกณฑ์อย่างใดอย่างหนึ่ง</span>
               <span>🔴 <b style={{color:"#ef4444"}}>ย้ายออก</b> — ทั้ง Run Rate และ AVG ต่ำกว่าค่าเช่า</span>
-              <span>⚠️ <b style={{color:"#6b8299"}}>ตรวจสอบ</b> — ไม่มีข้อมูลเดือนล่าสุด</span>
+              <span>⚠️ <b style={{color:"#64748b"}}>ตรวจสอบ</b> — ไม่มีข้อมูลเดือนล่าสุด</span>
             </div>
           </div>
 
           {[
             {key:"relocate",label:"🔴 ย้ายออก",        color:"#f87171",bd:"rgba(220,38,38,0.3)"},
             {key:"watch",   label:"👀 เฝ้าดู / พิจารณา",  color:"#fbbf24",bd:"rgba(251,191,36,0.3)"},
-            {key:"keep",    label:"✅ วางตู้ต่อ",          color:"#2dd4bf",bd:"#99f6e4"},
-            {key:"nodata",  label:"⚠️ ตรวจสอบสถานะ",     color:"#6b8299",bd:"rgba(148,163,184,0.15)"},
+            {key:"keep",    label:"✅ วางตู้ต่อ",          color:"#0d9488",bd:"#0d9488"},
+            {key:"nodata",  label:"⚠️ ตรวจสอบสถานะ",     color:"#64748b",bd:"rgba(148,163,184,0.15)"},
           ].map(({key,label,color,bd})=>{
             const g=grp[key]; if(!g.length) return null;
             return (
               <div key={key} className="card" style={{marginBottom:12,borderColor:bd}}>
                 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:9}}>
                   <span style={{fontWeight:700,color,fontSize:14}}>{label}</span>
-                  <span style={{fontSize:11,color:"#4a6070"}}>{g.length} เครื่อง</span>
+                  <span style={{fontSize:11,color:"#64748b"}}>{g.length} เครื่อง</span>
                 </div>
                 <div style={{overflowX:"auto"}}>
                   <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
                     <thead>
-                      <tr style={{borderBottom:"1px solid #232f42"}}>
+                      <tr style={{borderBottom:"1px solid #e6ebf1"}}>
                         {[["เครื่อง","left"],["วันติดตั้ง","center"],["ค่าเช่า","right"],["AVG","right"],["Run Rate","right"],["เหตุผล","left"]].map(([h,a])=>(
-                          <th key={h} style={{padding:"6px 9px",textAlign:a,color:"#6b8299",fontWeight:600}}>{h}</th>
+                          <th key={h} style={{padding:"6px 9px",textAlign:a,color:"#64748b",fontWeight:600}}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {g.map(r=>(
                         <tr key={r.device} className="rr" onClick={()=>{setSelDev(r.device);setView("detail");}}
-                          style={{borderBottom:"1px solid #1a2535"}}>
-                          <td style={{padding:"7px 9px",fontWeight:600,color:"#c9d8e8",whiteSpace:"nowrap"}}>{r.device}</td>
-                          <td style={{padding:"7px 9px",textAlign:"center",color:"#4a6070",whiteSpace:"nowrap"}}>{install[r.device]||"—"}</td>
+                          style={{borderBottom:"1px solid #f1f5f9"}}>
+                          <td style={{padding:"7px 9px",fontWeight:600,color:"#1e2a3a",whiteSpace:"nowrap"}}>{r.device}</td>
+                          <td style={{padding:"7px 9px",textAlign:"center",color:"#64748b",whiteSpace:"nowrap"}}>{install[r.device]||"—"}</td>
                           <td style={{padding:"7px 9px",textAlign:"right",color:"#f59e0b",whiteSpace:"nowrap"}}>฿{fmt(r.rent)}</td>
                           <td style={{padding:"7px 9px",textAlign:"right",whiteSpace:"nowrap"}}>
-                            <span style={{color:r.avg>=r.rent?"#2dd4bf":"#ef4444",fontWeight:600}}>฿{fmt(r.avg)}</span>
+                            <span style={{color:r.avg>=r.rent?"#0d9488":"#ef4444",fontWeight:600}}>฿{fmt(r.avg)}</span>
                           </td>
                           <td style={{padding:"7px 9px",textAlign:"right",whiteSpace:"nowrap"}}>
-                            {r.rr>0?<span style={{color:r.rr>=r.rent?"#2dd4bf":"#ef4444",fontWeight:600}}>฿{fmt(r.rr)}</span>:<span style={{color:"#2d3f55"}}>—</span>}
+                            {r.rr>0?<span style={{color:r.rr>=r.rent?"#0d9488":"#ef4444",fontWeight:600}}>฿{fmt(r.rr)}</span>:<span style={{color:"#d8e0e8"}}>—</span>}
                           </td>
-                          <td style={{padding:"7px 9px",color:"#4a6070",fontSize:11}}>{r.reason}</td>
+                          <td style={{padding:"7px 9px",color:"#64748b",fontSize:11}}>{r.reason}</td>
                         </tr>
                       ))}
                     </tbody>
