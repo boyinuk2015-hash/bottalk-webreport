@@ -276,7 +276,24 @@ async function exportRankingExcel(rankData, months, rentMap, locMap, install, el
 
   const now = new Date();
   const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}`;
-  XLSX.writeFile(wb, `ranking_${dateStr}.xlsx`);
+
+  // Build the workbook as a Blob and trigger a download via an anchor.
+  // XLSX.writeFile() does an in-frame <a download> click, which sandboxed
+  // hosts (e.g. the Claude artifact iframe) silently block. When we detect we
+  // are inside an iframe, open the file in a new top-level tab instead — the
+  // same target="_blank" path the photo links already use successfully.
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const url = URL.createObjectURL(blob);
+  const inIframe = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `ranking_${dateStr}.xlsx`;
+  if (inIframe) { a.target = "_blank"; a.rel = "noopener"; }
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
