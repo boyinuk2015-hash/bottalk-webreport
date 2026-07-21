@@ -1,6 +1,19 @@
-import React, { useState, useMemo, useRef, useCallback } from "react";
+import React, { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import * as XLSX from "xlsx";
+
+// ── Persistence: remember the last uploaded data across page reloads ──────────
+// Both upload channels (sales data + area/machine info) are saved to
+// localStorage and restored on load. New uploads overwrite the saved copy.
+const LS = {
+  get(key, fallback) {
+    try { const v = localStorage.getItem(key); return v == null ? fallback : JSON.parse(v); }
+    catch (e) { return fallback; }
+  },
+  set(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+  },
+};
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 // Default reference data (replaced when user uploads machine info file)
@@ -298,15 +311,15 @@ async function exportRankingExcel(rankData, months, rentMap, locMap, install, el
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function App() {
-  const [data,     setData]    = useState({});
-  const [fname,    setFname]   = useState("");
-  const [install,  setInstall] = useState(DEFAULT_INSTALL);
-  const [mapUrl,   setMapUrl]   = useState({});
-  const [locMap,   setLocMap]   = useState({});
-  const [photoMap, setPhotoMap] = useState({});
-  const [folderEmbed, setFolderEmbed] = useState(DEFAULT_FOLDER_EMBED);
-  const [rentMap,  setRentMap] = useState(DEFAULT_RENT);
-  const [mfname,   setMfname]  = useState("ข้อมูลตัวอย่าง");
+  const [data,     setData]    = useState(() => LS.get("bt_data", {}));
+  const [fname,    setFname]   = useState(() => LS.get("bt_fname", ""));
+  const [install,  setInstall] = useState(() => LS.get("bt_install", DEFAULT_INSTALL));
+  const [mapUrl,   setMapUrl]   = useState(() => LS.get("bt_mapUrl", {}));
+  const [locMap,   setLocMap]   = useState(() => LS.get("bt_locMap", {}));
+  const [photoMap, setPhotoMap] = useState(() => LS.get("bt_photoMap", {}));
+  const [folderEmbed, setFolderEmbed] = useState(() => LS.get("bt_folderEmbed", DEFAULT_FOLDER_EMBED));
+  const [rentMap,  setRentMap] = useState(() => LS.get("bt_rentMap", DEFAULT_RENT));
+  const [mfname,   setMfname]  = useState(() => LS.get("bt_mfname", "ข้อมูลตัวอย่าง"));
   const [view,     setView]    = useState("overview");
   const [selDev,   setSelDev]  = useState("");
   const [rankSort,   setRankSort]  = useState({col:"avg",dir:"desc"});
@@ -322,8 +335,26 @@ export default function App() {
   const fileRef  = useRef();
   const fileRefM = useRef();
 
+  // Persist the sales-data channel whenever it changes.
+  useEffect(() => { LS.set("bt_data", data); LS.set("bt_fname", fname); }, [data, fname]);
+  // Persist the area / machine-info channel whenever it changes.
+  useEffect(() => {
+    LS.set("bt_install", install);
+    LS.set("bt_rentMap", rentMap);
+    LS.set("bt_mapUrl", mapUrl);
+    LS.set("bt_locMap", locMap);
+    LS.set("bt_photoMap", photoMap);
+    LS.set("bt_folderEmbed", folderEmbed);
+    LS.set("bt_mfname", mfname);
+  }, [install, rentMap, mapUrl, locMap, photoMap, folderEmbed, mfname]);
+
   const months  = useMemo(()=>getMonths(data),[data]);
   const devices = useMemo(()=>Object.keys(data).sort(),[data]);
+
+  // On load, if we restored sales data but have no selected device yet, pick the first.
+  useEffect(() => {
+    if (!selDev && devices.length) setSelDev(devices[0]);
+  }, [devices, selDev]);
   const lastM   = months[months.length-1];
   const lastDays = useMemo(()=>{ if(!lastM)return 31; const[y,mo]=lastM.split("-").map(Number); return new Date(y,mo,0).getDate(); },[lastM]);
   const elapsed  = useMemo(()=>{ if(!lastM)return lastDays; const[y,mo]=lastM.split("-").map(Number); const t=new Date(); return t.getFullYear()===y&&t.getMonth()+1===mo?t.getDate():lastDays; },[lastM,lastDays]);
@@ -545,6 +576,11 @@ export default function App() {
         .dz{border:2px dashed #d8e0e8;border-radius:10px;padding:7px 13px;cursor:pointer;transition:all .18s;background:#ffffff;display:inline-flex;align-items:center;gap:8px}
         .dz:hover,.dz.drag{border-color:#0d9488;background:rgba(45,212,191,0.07)}
         .tip-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center}
+        /* Clearer table grid so rows and columns are easy to follow */
+        table{border-collapse:collapse}
+        th,td{border:1px solid #dbe3ec}
+        thead th{border-bottom:2px solid #aebccb;background:#f2f6fa}
+        tbody tr:hover td{background:#eef4f9}
       `}</style>
 
       {/* Header */}
