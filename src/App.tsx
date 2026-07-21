@@ -361,6 +361,55 @@ export default function App() {
   const lastDays = useMemo(()=>{ if(!lastM)return 31; const[y,mo]=lastM.split("-").map(Number); return new Date(y,mo,0).getDate(); },[lastM]);
   const elapsed  = useMemo(()=>{ if(!lastM)return lastDays; const[y,mo]=lastM.split("-").map(Number); const t=new Date(); return t.getFullYear()===y&&t.getMonth()+1===mo?t.getDate():lastDays; },[lastM,lastDays]);
 
+  // ── Executive summary (buckets by monthly revenue) for LINE ─────────────────
+  const [sumMonth,  setSumMonth]  = useState("");
+  const [copiedSum, setCopiedSum] = useState(false);
+  // Default the summary month to the last *complete* month (skip the partial current month).
+  useEffect(() => {
+    if (!months.length) return;
+    const lastComplete = (elapsed < lastDays && months.length > 1) ? months[months.length-2] : months[months.length-1];
+    if (!sumMonth || !months.includes(sumMonth)) setSumMonth(lastComplete);
+  }, [months, elapsed, lastDays, sumMonth]);
+  const summaryText = useMemo(() => {
+    if (!sumMonth) return "";
+    const b = { over6:0, b36:0, b23:0, b12:0, under1:0 };
+    let total = 0, sum = 0;
+    devices.forEach(d => {
+      const v = data[d]?.[sumMonth]?.total || 0;
+      if (v <= 0) return;              // count only machines that reported that month
+      total++; sum += v;
+      if (v >= 6000) b.over6++;
+      else if (v >= 3000) b.b36++;
+      else if (v >= 2000) b.b23++;
+      else if (v >= 1000) b.b12++;
+      else b.under1++;
+    });
+    const lines = [
+      `📊 สรุปตู้ Bottalk — เดือน ${ml(sumMonth)}`,
+      ``,
+      `จำนวนตู้ทั้งหมด = ${total} ตู้`,
+    ];
+    if (b.over6) lines.push(`ตู้ยอด มากกว่า 6,000 = ${b.over6} ตู้`);
+    lines.push(`ตู้ยอด 3,000-6,000 = ${b.b36} ตู้`);
+    lines.push(`ตู้ยอด 2,000-2,999 = ${b.b23} ตู้`);
+    lines.push(`ตู้ยอด 1,000-1,999 = ${b.b12} ตู้`);
+    lines.push(`ตู้ยอด ต่ำกว่า 1,000 = ${b.under1} ตู้`);
+    lines.push(``, `รายได้รวมเดือนนี้ = ฿${fmt(sum)}`);
+    return lines.join("\n");
+  }, [sumMonth, devices, data]);
+  const copySummary = () => {
+    const text = summaryText;
+    try {
+      const el = document.createElement("textarea");
+      el.value = text; el.style.position = "fixed"; el.style.opacity = "0";
+      document.body.appendChild(el); el.focus(); el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(()=>{});
+    } catch (e) {}
+    setCopiedSum(true); setTimeout(() => setCopiedSum(false), 1800);
+  };
+
   // Load file — supports .xlsx via SheetJS CDN (loaded lazily), .csv natively
   const loadFile = useCallback(async file => {
     if (!file) return;
@@ -894,6 +943,33 @@ export default function App() {
       {/* ── DECISION ── */}
       {view==="decision"&&(
         <div>
+          {/* Executive summary box — copy & send on LINE */}
+          <div className="card" style={{marginBottom:14,borderColor:"rgba(45,212,191,0.35)"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10,marginBottom:10}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                <span style={{fontSize:13,fontWeight:700,color:"#0d9488"}}>📋 สรุปตู้สำหรับส่งผู้บริหาร (LINE)</span>
+                <select value={sumMonth} onChange={e=>setSumMonth(e.target.value)}>
+                  {months.map(m=>(
+                    <option key={m} value={m}>{ml(m)}{m===lastM&&elapsed<lastDays?" (ยังไม่จบเดือน)":""}</option>
+                  ))}
+                </select>
+              </div>
+              <button onClick={copySummary}
+                style={{display:"inline-flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,
+                  border:"1px solid rgba(45,212,191,0.4)",
+                  background:copiedSum?"rgba(45,212,191,0.2)":"rgba(45,212,191,0.1)",
+                  color:"#0d9488",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit",transition:"all .15s"}}>
+                {copiedSum?"✓ คัดลอกแล้ว":"📋 คัดลอกข้อความ"}
+              </button>
+            </div>
+            <textarea readOnly value={summaryText} onFocus={e=>e.target.select()}
+              style={{width:"100%",minHeight:170,resize:"vertical",boxSizing:"border-box",
+                background:"#f8fafc",border:"1px solid #d8e0e8",borderRadius:10,padding:"12px 14px",
+                fontFamily:"'IBM Plex Sans Thai','Sarabun',monospace",fontSize:14,lineHeight:1.7,
+                color:"#1e2a3a",outline:"none",whiteSpace:"pre"}}/>
+            <div style={{fontSize:10.5,color:"#64748b",marginTop:6}}>นับเฉพาะตู้ที่มียอดในเดือนนั้น · แตะช่องเพื่อเลือกทั้งหมด แล้วคัดลอกไปวางในไลน์ได้เลย</div>
+          </div>
+
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(145px,1fr))",gap:10,marginBottom:16}}>
             {[
               {key:"keep",    icon:"✅",label:"วางตู้ต่อ",      color:"#0d9488",bg:"rgba(45,212,191,0.07)",  bd:"rgba(45,212,191,0.2)"},
