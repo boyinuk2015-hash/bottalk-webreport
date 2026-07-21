@@ -372,31 +372,36 @@ export default function App() {
   }, [months, elapsed, lastDays, sumMonth]);
   const summaryText = useMemo(() => {
     if (!sumMonth) return "";
-    const b = { over6:0, b36:0, b23:0, b12:0, under1:0 };
-    let total = 0, sum = 0;
+    // Bucket by net revenue after rent (ยอดขาย - ค่าเช่า) for the selected month.
+    const b = { over6:0, b36:0, b23:0, b12:0, b01:0, neg:0 };
+    let total = 0, grossSum = 0, netSum = 0;
     devices.forEach(d => {
       const v = data[d]?.[sumMonth]?.total || 0;
       if (v <= 0) return;              // count only machines that reported that month
-      total++; sum += v;
-      if (v >= 6000) b.over6++;
-      else if (v >= 3000) b.b36++;
-      else if (v >= 2000) b.b23++;
-      else if (v >= 1000) b.b12++;
-      else b.under1++;
+      const net = v - (rentMap[d] || 0);
+      total++; grossSum += v; netSum += net;
+      if (net >= 6000) b.over6++;
+      else if (net >= 3000) b.b36++;
+      else if (net >= 2000) b.b23++;
+      else if (net >= 1000) b.b12++;
+      else if (net >= 0) b.b01++;
+      else b.neg++;
     });
     const lines = [
       `📊 สรุปตู้ Bottalk — เดือน ${ml(sumMonth)}`,
+      `(สุทธิหักเช่า = ยอดขาย - ค่าเช่า)`,
       ``,
       `จำนวนตู้ทั้งหมด = ${total} ตู้`,
     ];
-    if (b.over6) lines.push(`ตู้ยอด มากกว่า 6,000 = ${b.over6} ตู้`);
-    lines.push(`ตู้ยอด 3,000-6,000 = ${b.b36} ตู้`);
-    lines.push(`ตู้ยอด 2,000-2,999 = ${b.b23} ตู้`);
-    lines.push(`ตู้ยอด 1,000-1,999 = ${b.b12} ตู้`);
-    lines.push(`ตู้ยอด ต่ำกว่า 1,000 = ${b.under1} ตู้`);
-    lines.push(``, `รายได้รวมเดือนนี้ = ฿${fmt(sum)}`);
+    if (b.over6) lines.push(`ตู้สุทธิ มากกว่า 6,000 = ${b.over6} ตู้`);
+    lines.push(`ตู้สุทธิ 3,000-6,000 = ${b.b36} ตู้`);
+    lines.push(`ตู้สุทธิ 2,000-2,999 = ${b.b23} ตู้`);
+    lines.push(`ตู้สุทธิ 1,000-1,999 = ${b.b12} ตู้`);
+    lines.push(`ตู้สุทธิ ต่ำกว่า 1,000 = ${b.b01} ตู้`);
+    lines.push(`ตู้สุทธิ ติดลบ (ขาดทุน) = ${b.neg} ตู้`);
+    lines.push(``, `รายได้รวม (ยอดขาย) = ฿${fmt(grossSum)}`, `สุทธิหักค่าเช่า = ฿${fmt(netSum)}`);
     return lines.join("\n");
-  }, [sumMonth, devices, data]);
+  }, [sumMonth, devices, data, rentMap]);
   const copySummary = () => {
     const text = summaryText;
     try {
@@ -967,7 +972,7 @@ export default function App() {
                 background:"#f8fafc",border:"1px solid #d8e0e8",borderRadius:10,padding:"12px 14px",
                 fontFamily:"'IBM Plex Sans Thai','Sarabun',monospace",fontSize:14,lineHeight:1.7,
                 color:"#1e2a3a",outline:"none",whiteSpace:"pre"}}/>
-            <div style={{fontSize:10.5,color:"#64748b",marginTop:6}}>นับเฉพาะตู้ที่มียอดในเดือนนั้น · แตะช่องเพื่อเลือกทั้งหมด แล้วคัดลอกไปวางในไลน์ได้เลย</div>
+            <div style={{fontSize:10.5,color:"#64748b",marginTop:6}}>แบ่งกลุ่มตามยอดสุทธิ (ยอดขาย − ค่าเช่า) · นับเฉพาะตู้ที่มียอดในเดือนนั้น · ตู้ที่ยังไม่มีข้อมูลค่าเช่าจะคิดค่าเช่า = 0 · แตะช่องเพื่อเลือกทั้งหมด แล้วคัดลอกไปวางในไลน์ได้เลย</div>
           </div>
 
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(145px,1fr))",gap:10,marginBottom:16}}>
