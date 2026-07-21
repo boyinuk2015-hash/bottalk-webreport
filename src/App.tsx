@@ -310,30 +310,6 @@ async function exportRankingExcel(rankData, months, rentMap, locMap, install, el
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-// ── PIN gate ──────────────────────────────────────────────────────────────────
-const APP_PIN = "246810"; // เปลี่ยนได้โดยแจ้งผู้ดูแล
-function PinGate({ onUnlock }) {
-  const [pin, setPin] = useState("");
-  const [bad, setBad] = useState(false);
-  const submit = () => { if (pin === APP_PIN) onUnlock(); else { setBad(true); setPin(""); } };
-  return (
-    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#f2f6fa",fontFamily:"'IBM Plex Sans Thai','Sarabun',sans-serif",padding:20}}>
-      <div style={{background:"#fff",border:"1px solid #d8e0e8",borderRadius:16,padding:"32px 28px",width:"min(340px,92vw)",boxShadow:"0 4px 20px rgba(15,24,36,0.08)",textAlign:"center"}}>
-        <div style={{fontSize:34,marginBottom:8}}>🔒</div>
-        <div style={{fontSize:17,fontWeight:700,color:"#0f1824",marginBottom:4}}>Bottalk Report</div>
-        <div style={{fontSize:12,color:"#64748b",marginBottom:18}}>ใส่ PIN เพื่อเข้าใช้งาน</div>
-        <input type="password" inputMode="numeric" value={pin} autoFocus
-          onChange={e=>{setPin(e.target.value);setBad(false);}}
-          onKeyDown={e=>{if(e.key==="Enter")submit();}}
-          placeholder="• • • • • •"
-          style={{width:"100%",boxSizing:"border-box",textAlign:"center",fontSize:20,letterSpacing:6,padding:"11px",borderRadius:10,border:`1px solid ${bad?"#ef4444":"#d8e0e8"}`,outline:"none",color:"#0f1824",marginBottom:12,fontFamily:"inherit"}}/>
-        {bad&&<div style={{fontSize:12,color:"#ef4444",marginBottom:10}}>PIN ไม่ถูกต้อง</div>}
-        <button onClick={submit} style={{width:"100%",padding:"11px",borderRadius:10,border:"none",background:"#0d9488",color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>เข้าสู่ระบบ</button>
-      </div>
-    </div>
-  );
-}
-
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function App() {
   const [data,     setData]    = useState(() => LS.get("bt_data", {}));
@@ -361,7 +337,6 @@ export default function App() {
   const [errM,     setErrM]    = useState("");
   const fileRef  = useRef();
   const fileRefM = useRef();
-  const [unlocked, setUnlocked] = useState(() => LS.get("bt_unlocked", false) === true);
 
   // Persist the sales-data channel whenever it changes.
   useEffect(() => { LS.set("bt_data", data); LS.set("bt_fname", fname); }, [data, fname]);
@@ -559,12 +534,14 @@ export default function App() {
       const { install: newInstall, rent: newRent, mapData: newMapData, locData: newLocData, photoData: newPhotoData } = parseMachineInfo(rows);
       if (Object.keys(newInstall).length === 0 && Object.keys(newRent).length === 0)
         throw new Error("ไม่พบข้อมูลในไฟล์ — ตรวจสอบ column headers");
+      // Replace each channel the new file provides (new data fully replaces old);
+      // keep the existing values only for channels the file doesn't include.
       const cur = stateRef.current;
-      const mInstall = {...cur.install, ...newInstall};
-      const mRent    = {...cur.rentMap, ...newRent};
-      const mMap     = (newMapData   && Object.keys(newMapData).length)   ? {...cur.mapUrl,   ...newMapData}   : cur.mapUrl;
-      const mLoc     = (newLocData   && Object.keys(newLocData).length)   ? {...cur.locMap,   ...newLocData}   : cur.locMap;
-      const mPhoto   = (newPhotoData && Object.keys(newPhotoData).length) ? {...cur.photoMap, ...newPhotoData} : cur.photoMap;
+      const mInstall = Object.keys(newInstall).length ? newInstall : cur.install;
+      const mRent    = Object.keys(newRent).length    ? newRent    : cur.rentMap;
+      const mMap     = (newMapData   && Object.keys(newMapData).length)   ? newMapData   : cur.mapUrl;
+      const mLoc     = (newLocData   && Object.keys(newLocData).length)   ? newLocData   : cur.locMap;
+      const mPhoto   = (newPhotoData && Object.keys(newPhotoData).length) ? newPhotoData : cur.photoMap;
       setInstall(mInstall);
       setRentMap(mRent);
       setMapUrl(mMap);
@@ -686,7 +663,6 @@ export default function App() {
   };
 
   // ── Render ────────────────────────────────────────────────────────────────────
-  if (!unlocked) return <PinGate onUnlock={() => { LS.set("bt_unlocked", true); setUnlocked(true); }} />;
   return (
     <div style={{minHeight:"100vh",background:BG,color:"#1e2a3a",fontFamily:"'IBM Plex Sans Thai','Sarabun',sans-serif",padding:"18px 16px"}}>
       <style>{`
