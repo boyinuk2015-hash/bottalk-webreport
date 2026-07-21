@@ -604,7 +604,7 @@ export default function App() {
     const actual = r.bm[m]||0;
     const v = isLastOpen ? r.rr : actual;
     const t = r.tr[m];
-    return <td key={m} style={{padding:"8px 9px",textAlign:"right",color:v>0?(isLastOpen?"#fbbf24":"#5b7186"):"#d8e0e8",whiteSpace:"nowrap"}}>
+    return <td key={m} style={{padding:"8px 9px",textAlign:"right",color:v>0?(isLastOpen?"#2563eb":"#5b7186"):"#d8e0e8",fontWeight:isLastOpen&&v>0?700:400,whiteSpace:"nowrap"}}>
       <span style={{display:"inline-flex",alignItems:"center",gap:3,justifyContent:"flex-end"}}>
         {v>0?`฿${fmt(v)}`:"—"}{showT&&!isLastOpen&&<Trend t={t} v={actual}/>}
       </span>
@@ -906,7 +906,7 @@ export default function App() {
                         {locMap[r.device]||<span style={{color:"#d8e0e8"}}>—</span>}
                       </td>
                       <td style={{padding:"7px 9px",textAlign:"center",color:"#64748b",whiteSpace:"nowrap"}}>{install[r.device]||"—"}</td>
-                      <td style={{padding:"7px 9px",textAlign:"right",color:"#f59e0b",whiteSpace:"nowrap"}}>฿{fmt(rentMap[r.device]||0)}</td>
+                      <td style={{padding:"7px 9px",textAlign:"right",color:"#0f1824",fontWeight:700,whiteSpace:"nowrap"}}>฿{fmt(rentMap[r.device]||0)}</td>
                       {months.map((m,mi)=>cv(r,m,mi>0, mi===months.length-1&&elapsed<lastDays))}
                       <td style={{padding:"7px 9px",textAlign:"right",whiteSpace:"nowrap"}}>
                         <span style={{color:isLow?"#f87171":r.avg>=(rentMap[r.device]||0)?"#0d9488":"#5b7186",fontWeight:isLow?700:400}}>฿{fmt(r.avg)}</span>
@@ -941,7 +941,7 @@ export default function App() {
               </tbody>
             </table>
           </div>
-          <p style={{fontSize:10,color:"#d8e0e8",marginTop:8,lineHeight:1.5}}>* = ค่า RunRate (ประมาณการ {elapsed}/{lastDays} วัน) · ตัวเลขสีเหลือง = RunRate · AVG เฉลี่ยทุกเดือน (เดือน * ใช้ RunRate) · แดง = AVG &lt; ค่าเช่า · เรียงตาม AVG มาก→น้อย</p>
+          <p style={{fontSize:10,color:"#d8e0e8",marginTop:8,lineHeight:1.5}}>* = ค่า RunRate (ประมาณการ {elapsed}/{lastDays} วัน) · ตัวเลขสีน้ำเงิน = RunRate · AVG เฉลี่ยทุกเดือน (เดือน * ใช้ RunRate) · แดง = AVG &lt; ค่าเช่า · เรียงตาม AVG มาก→น้อย</p>
         </div>
       )}
 
@@ -1030,7 +1030,7 @@ export default function App() {
                           <td style={{padding:"7px 9px",fontWeight:600,color:"#1e2a3a",whiteSpace:"nowrap"}}>{r.device}</td>
                           <td style={{padding:"7px 9px",color:"#5b7186",maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={locMap[r.device]||""}>{locMap[r.device]||<span style={{color:"#d8e0e8"}}>—</span>}</td>
                           <td style={{padding:"7px 9px",textAlign:"center",color:"#64748b",whiteSpace:"nowrap"}}>{install[r.device]||"—"}</td>
-                          <td style={{padding:"7px 9px",textAlign:"right",color:"#f59e0b",whiteSpace:"nowrap"}}>฿{fmt(r.rent)}</td>
+                          <td style={{padding:"7px 9px",textAlign:"right",color:"#0f1824",fontWeight:700,whiteSpace:"nowrap"}}>฿{fmt(r.rent)}</td>
                           <td style={{padding:"7px 9px",textAlign:"right",whiteSpace:"nowrap"}}>
                             <span style={{color:r.avg>=r.rent?"#0d9488":"#ef4444",fontWeight:600}}>฿{fmt(r.avg)}</span>
                           </td>
