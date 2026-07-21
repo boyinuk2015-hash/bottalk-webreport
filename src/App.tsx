@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import * as XLSX from "xlsx";
+import { cloudEnabled, subscribeReport, saveReport } from "./cloud";
 
 // ── Persistence: remember the last uploaded data across page reloads ──────────
 // Both upload channels (sales data + area/machine info) are saved to
@@ -309,6 +310,30 @@ async function exportRankingExcel(rankData, months, rentMap, locMap, install, el
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
+// ── PIN gate ──────────────────────────────────────────────────────────────────
+const APP_PIN = "246810"; // เปลี่ยนได้โดยแจ้งผู้ดูแล
+function PinGate({ onUnlock }) {
+  const [pin, setPin] = useState("");
+  const [bad, setBad] = useState(false);
+  const submit = () => { if (pin === APP_PIN) onUnlock(); else { setBad(true); setPin(""); } };
+  return (
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#f2f6fa",fontFamily:"'IBM Plex Sans Thai','Sarabun',sans-serif",padding:20}}>
+      <div style={{background:"#fff",border:"1px solid #d8e0e8",borderRadius:16,padding:"32px 28px",width:"min(340px,92vw)",boxShadow:"0 4px 20px rgba(15,24,36,0.08)",textAlign:"center"}}>
+        <div style={{fontSize:34,marginBottom:8}}>🔒</div>
+        <div style={{fontSize:17,fontWeight:700,color:"#0f1824",marginBottom:4}}>Bottalk Report</div>
+        <div style={{fontSize:12,color:"#64748b",marginBottom:18}}>ใส่ PIN เพื่อเข้าใช้งาน</div>
+        <input type="password" inputMode="numeric" value={pin} autoFocus
+          onChange={e=>{setPin(e.target.value);setBad(false);}}
+          onKeyDown={e=>{if(e.key==="Enter")submit();}}
+          placeholder="• • • • • •"
+          style={{width:"100%",boxSizing:"border-box",textAlign:"center",fontSize:20,letterSpacing:6,padding:"11px",borderRadius:10,border:`1px solid ${bad?"#ef4444":"#d8e0e8"}`,outline:"none",color:"#0f1824",marginBottom:12,fontFamily:"inherit"}}/>
+        {bad&&<div style={{fontSize:12,color:"#ef4444",marginBottom:10}}>PIN ไม่ถูกต้อง</div>}
+        <button onClick={submit} style={{width:"100%",padding:"11px",borderRadius:10,border:"none",background:"#0d9488",color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>เข้าสู่ระบบ</button>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function App() {
   const [data,     setData]    = useState(() => LS.get("bt_data", {}));
@@ -336,6 +361,7 @@ export default function App() {
   const [errM,     setErrM]    = useState("");
   const fileRef  = useRef();
   const fileRefM = useRef();
+  const [unlocked, setUnlocked] = useState(() => LS.get("bt_unlocked", false) === true);
 
   // Persist the sales-data channel whenever it changes.
   useEffect(() => { LS.set("bt_data", data); LS.set("bt_fname", fname); }, [data, fname]);
@@ -349,6 +375,45 @@ export default function App() {
     LS.set("bt_folderEmbed", folderEmbed);
     LS.set("bt_mfname", mfname);
   }, [install, rentMap, mapUrl, locMap, photoMap, folderEmbed, mfname]);
+
+  // ── Cloud sync (Firebase) ─────────────────────────────────────────────────
+  // A live mirror of the current state so cloud writes always use fresh values.
+  const stateRef = useRef({});
+  useEffect(() => {
+    stateRef.current = { data, fname, install, rentMap, mapUrl, locMap, photoMap, folderEmbed, mfname };
+  });
+  const [cloudStatus, setCloudStatus] = useState(cloudEnabled ? "connecting" : "off");
+  const cloudReadyRef = useRef(false);
+  // Write the full report (current state merged with overrides) to the cloud.
+  const pushCloud = useCallback((overrides = {}) => {
+    if (!cloudEnabled) return;
+    const payload = { ...stateRef.current, ...overrides };
+    saveReport(payload).then(() => setCloudStatus("synced")).catch(() => setCloudStatus("error"));
+  }, []);
+  // Subscribe to the shared cloud report and apply remote changes to local state.
+  useEffect(() => {
+    if (!cloudEnabled) return;
+    const unsub = subscribeReport((p) => {
+      if (p) {
+        if (p.data) setData(p.data);
+        if (p.fname != null) setFname(p.fname);
+        if (p.install) setInstall(p.install);
+        if (p.rentMap) setRentMap(p.rentMap);
+        if (p.mapUrl) setMapUrl(p.mapUrl);
+        if (p.locMap) setLocMap(p.locMap);
+        if (p.photoMap) setPhotoMap(p.photoMap);
+        if (p.folderEmbed) setFolderEmbed(p.folderEmbed);
+        if (p.mfname != null) setMfname(p.mfname);
+        setCloudStatus("synced");
+      } else {
+        // No cloud document yet — seed it from whatever we have locally.
+        setCloudStatus("synced");
+        if (stateRef.current.data && Object.keys(stateRef.current.data).length) pushCloud();
+      }
+      cloudReadyRef.current = true;
+    }, () => setCloudStatus("error"));
+    return () => unsub();
+  }, [pushCloud]);
 
   const months  = useMemo(()=>getMonths(data),[data]);
   const devices = useMemo(()=>Object.keys(data).sort(),[data]);
@@ -425,6 +490,7 @@ export default function App() {
         const text = await file.text();
         const parsed = parseCSV(text);
         setData(parsed); setFname(file.name); setSelDev(Object.keys(parsed).sort()[0]); setView("overview");
+        pushCloud({ data: parsed, fname: file.name });
       } else if (ext==="xlsx"||ext==="xls") {
         const buf = await file.arrayBuffer();
         const wb  = XLSX.read(buf,{type:"array"});
@@ -464,12 +530,13 @@ export default function App() {
           v.total=Math.round(v.total*10)/10; v.cash=Math.round(v.cash*10)/10; v.qr=Math.round(v.qr*10)/10;
         }));
         setData(result); setFname(file.name); setSelDev(Object.keys(result).sort()[0]); setView("overview");
+        pushCloud({ data: result, fname: file.name });
       } else {
         throw new Error("รองรับเฉพาะ .xlsx, .xls, .csv");
       }
     } catch(e) { setErr(e.message); }
     setBusy(false);
-  },[]);
+  },[pushCloud]);
 
   // Load machine-info file (install date + rent)
   const loadMachineFile = useCallback(async file => {
@@ -492,15 +559,22 @@ export default function App() {
       const { install: newInstall, rent: newRent, mapData: newMapData, locData: newLocData, photoData: newPhotoData } = parseMachineInfo(rows);
       if (Object.keys(newInstall).length === 0 && Object.keys(newRent).length === 0)
         throw new Error("ไม่พบข้อมูลในไฟล์ — ตรวจสอบ column headers");
-      setInstall(prev => ({...prev, ...newInstall}));
-      setRentMap(prev => ({...prev, ...newRent}));
-      if (newMapData  && Object.keys(newMapData).length)  setMapUrl(prev =>  ({...prev, ...newMapData}));
-      if (newLocData  && Object.keys(newLocData).length)  setLocMap(prev =>  ({...prev, ...newLocData}));
-      if (newPhotoData && Object.keys(newPhotoData).length) setPhotoMap(prev => ({...prev, ...newPhotoData}));
+      const cur = stateRef.current;
+      const mInstall = {...cur.install, ...newInstall};
+      const mRent    = {...cur.rentMap, ...newRent};
+      const mMap     = (newMapData   && Object.keys(newMapData).length)   ? {...cur.mapUrl,   ...newMapData}   : cur.mapUrl;
+      const mLoc     = (newLocData   && Object.keys(newLocData).length)   ? {...cur.locMap,   ...newLocData}   : cur.locMap;
+      const mPhoto   = (newPhotoData && Object.keys(newPhotoData).length) ? {...cur.photoMap, ...newPhotoData} : cur.photoMap;
+      setInstall(mInstall);
+      setRentMap(mRent);
+      setMapUrl(mMap);
+      setLocMap(mLoc);
+      setPhotoMap(mPhoto);
       setMfname(file.name);
+      pushCloud({ install: mInstall, rentMap: mRent, mapUrl: mMap, locMap: mLoc, photoMap: mPhoto, mfname: file.name });
     } catch(e) { setErrM(e.message); }
     setBusyM(false);
-  }, []);
+  }, [pushCloud]);
 
   // ── Computed ─────────────────────────────────────────────────────────────────
   const ovData = useMemo(()=>months.map(m=>{
@@ -612,6 +686,7 @@ export default function App() {
   };
 
   // ── Render ────────────────────────────────────────────────────────────────────
+  if (!unlocked) return <PinGate onUnlock={() => { LS.set("bt_unlocked", true); setUnlocked(true); }} />;
   return (
     <div style={{minHeight:"100vh",background:BG,color:"#1e2a3a",fontFamily:"'IBM Plex Sans Thai','Sarabun',sans-serif",padding:"18px 16px"}}>
       <style>{`
@@ -642,7 +717,17 @@ export default function App() {
       {/* Header */}
       <div style={{marginBottom:18,display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
         <div>
-          <h1 style={{margin:"0 0 3px",fontSize:21,fontWeight:700,color:"#0f1824"}}>วิเคราะห์รายได้ตู้กดน้ำ</h1>
+          <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+            <h1 style={{margin:"0 0 3px",fontSize:21,fontWeight:700,color:"#0f1824"}}>วิเคราะห์รายได้ตู้กดน้ำ</h1>
+            {cloudStatus!=="off"&&(
+              <span title="ข้อมูลถูกบันทึกบนคลาวด์ (ทุกเครื่องเห็นเหมือนกัน)" style={{fontSize:10.5,fontWeight:600,padding:"2px 8px",borderRadius:20,whiteSpace:"nowrap",
+                background:cloudStatus==="synced"?"rgba(45,212,191,0.12)":cloudStatus==="error"?"rgba(220,38,38,0.1)":"rgba(100,116,139,0.1)",
+                color:cloudStatus==="synced"?"#0d9488":cloudStatus==="error"?"#ef4444":"#64748b",
+                border:`1px solid ${cloudStatus==="synced"?"rgba(45,212,191,0.3)":cloudStatus==="error"?"rgba(220,38,38,0.25)":"rgba(100,116,139,0.2)"}`}}>
+                {cloudStatus==="synced"?"☁️ ซิงค์แล้ว":cloudStatus==="error"?"⚠️ ออฟไลน์":"☁️ กำลังเชื่อม…"}
+              </span>
+            )}
+          </div>
           <p style={{margin:0,color:"#64748b",fontSize:11}}>{fname?`📊 ${fname}`:"📊 ยังไม่ได้อัปโหลดข้อมูล"} {mfname?`· 🏭 ${mfname}`:""} {months.length>0?`· ${devices.length} เครื่อง · ${ml(months[0])} – ${ml(lastM)}`:""}</p>
         </div>
         <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
