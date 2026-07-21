@@ -820,7 +820,7 @@ export default function App() {
                   return (
                     <React.Fragment key={r.device}>
                     {showDivider && (
-                      <tr key="__divider__"><td colSpan={99} style={{padding:"6px 10px",background:"#f1f5f9",fontSize:10,color:"#64748b",fontStyle:"italic",borderBottom:"1px solid #e6ebf1"}}>
+                      <tr key="__divider__"><td colSpan={99} style={{padding:"10px",background:"#fff7e6",fontSize:12.5,color:"#b45309",fontWeight:700,textAlign:"center",letterSpacing:"0.3px",borderTop:"2px solid #f3d19e",borderBottom:"2px solid #f3d19e"}}>
                         ── ติดตั้งน้อยกว่า 2 เดือน (ยังไม่นำมาประเมิน) ──
                       </td></tr>
                     )}
@@ -829,7 +829,7 @@ export default function App() {
                       <td style={{padding:"7px 9px",fontWeight:600,color:isSel?"#0d9488":isLow?"#f87171":"#1e2a3a",whiteSpace:"nowrap"}}>
                         <div style={{display:"flex",alignItems:"center",gap:5}}>
                           {r.device}
-                          {!r.mature&&<span style={{fontSize:9,background:"rgba(251,191,36,0.15)",border:"1px solid rgba(251,191,36,0.3)",borderRadius:4,padding:"1px 5px",color:"#fbbf24",fontWeight:500}}>{r.monthsInstalled}M</span>}
+                          <span style={{fontSize:9,background:r.mature?"rgba(100,116,139,0.12)":"rgba(251,191,36,0.15)",border:r.mature?"1px solid rgba(100,116,139,0.25)":"1px solid rgba(251,191,36,0.35)",borderRadius:4,padding:"1px 6px",color:r.mature?"#64748b":"#d97706",fontWeight:600,whiteSpace:"nowrap"}}>{r.monthsInstalled} เดือน</span>
                           <button
                             onClick={e=>{
                               e.stopPropagation();
@@ -937,7 +937,7 @@ export default function App() {
                   <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
                     <thead>
                       <tr style={{borderBottom:"1px solid #e6ebf1"}}>
-                        {[["เครื่อง","left"],["วันติดตั้ง","center"],["ค่าเช่า","right"],["AVG","right"],["Run Rate","right"],["เหตุผล","left"]].map(([h,a])=>(
+                        {[["เครื่อง","left"],["สถานที่","left"],["วันติดตั้ง","center"],["ค่าเช่า","right"],["AVG","right"],["Run Rate","right"],["เหตุผล","left"]].map(([h,a])=>(
                           <th key={h} style={{padding:"6px 9px",textAlign:a,color:"#64748b",fontWeight:600}}>{h}</th>
                         ))}
                       </tr>
@@ -947,6 +947,7 @@ export default function App() {
                         <tr key={r.device} className="rr" onClick={()=>{setSelDev(r.device);setView("detail");}}
                           style={{borderBottom:"1px solid #f1f5f9"}}>
                           <td style={{padding:"7px 9px",fontWeight:600,color:"#1e2a3a",whiteSpace:"nowrap"}}>{r.device}</td>
+                          <td style={{padding:"7px 9px",color:"#5b7186",maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={locMap[r.device]||""}>{locMap[r.device]||<span style={{color:"#d8e0e8"}}>—</span>}</td>
                           <td style={{padding:"7px 9px",textAlign:"center",color:"#64748b",whiteSpace:"nowrap"}}>{install[r.device]||"—"}</td>
                           <td style={{padding:"7px 9px",textAlign:"right",color:"#f59e0b",whiteSpace:"nowrap"}}>฿{fmt(r.rent)}</td>
                           <td style={{padding:"7px 9px",textAlign:"right",whiteSpace:"nowrap"}}>
