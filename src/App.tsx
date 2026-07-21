@@ -314,9 +314,11 @@ export default function App() {
   const [data,     setData]    = useState(() => LS.get("bt_data", {}));
   const [fname,    setFname]   = useState(() => LS.get("bt_fname", ""));
   const [install,  setInstall] = useState(() => LS.get("bt_install", DEFAULT_INSTALL));
-  const [mapUrl,   setMapUrl]   = useState(() => LS.get("bt_mapUrl", {}));
-  const [locMap,   setLocMap]   = useState(() => LS.get("bt_locMap", {}));
-  const [photoMap, setPhotoMap] = useState(() => LS.get("bt_photoMap", {}));
+  // Start from the built-in reference data, then overlay any saved/uploaded data
+  // so location, map and photo columns show up even before an area file is uploaded.
+  const [mapUrl,   setMapUrl]   = useState(() => ({ ...DEFAULT_MAP,      ...LS.get("bt_mapUrl", {}) }));
+  const [locMap,   setLocMap]   = useState(() => ({ ...DEFAULT_LOCATION, ...LS.get("bt_locMap", {}) }));
+  const [photoMap, setPhotoMap] = useState(() => ({ ...DEFAULT_PHOTO,    ...LS.get("bt_photoMap", {}) }));
   const [folderEmbed, setFolderEmbed] = useState(() => LS.get("bt_folderEmbed", DEFAULT_FOLDER_EMBED));
   const [rentMap,  setRentMap] = useState(() => LS.get("bt_rentMap", DEFAULT_RENT));
   const [mfname,   setMfname]  = useState(() => LS.get("bt_mfname", "ข้อมูลตัวอย่าง"));
