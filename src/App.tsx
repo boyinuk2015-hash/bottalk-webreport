@@ -326,7 +326,7 @@ export default function App() {
   const [mfname,   setMfname]  = useState(() => LS.get("bt_mfname", "ข้อมูลตัวอย่าง"));
   const [view,     setView]    = useState("overview");
   const [selDev,   setSelDev]  = useState("");
-  const [rankSort,   setRankSort]  = useState({col:"avg",dir:"desc"});
+  const [rankSort,   setRankSort]  = useState({col:"pl",dir:"desc"});
   const [exporting,  setExporting] = useState(false);
   const [copied,   setCopied]   = useState("");
   const [mapModal, setMapModal] = useState(null); // {url, label}
