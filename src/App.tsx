@@ -225,7 +225,7 @@ async function exportRankingExcel(rankData, months, rentMap, locMap, install, el
   const headers = [
     "#", "หมายเลขเครื่อง", "สถานที่", "วันติดตั้ง", "เดือน(ติดตั้ง)", "ค่าเช่า",
     ...months.map((m, i) => ml(m) + (i === months.length - 1 && isLastOpen ? " *" : "")),
-    "AVG", "รวม", "ครั้ง", "สัดส่วน%", "สถานะ"
+    "AVG", "P/L", "รวม", "ครั้ง", "สัดส่วน%", "สถานะ"
   ];
 
   const totalGrand = rankData.reduce((s, r) => s + r.total, 0);
@@ -246,6 +246,7 @@ async function exportRankingExcel(rankData, months, rentMap, locMap, install, el
       rent,
       ...monthVals,
       r.avg,
+      Math.round(r.avg - rent),
       r.total,
       r.count,
       parseFloat((r.total / totalGrand * 100).toFixed(1)),
@@ -259,7 +260,7 @@ async function exportRankingExcel(rankData, months, rentMap, locMap, install, el
   ws["!cols"] = [
     {wch:4},{wch:14},{wch:28},{wch:12},{wch:8},{wch:10},
     ...months.map(()=>({wch:12})),
-    {wch:10},{wch:10},{wch:8},{wch:10},{wch:16}
+    {wch:10},{wch:10},{wch:10},{wch:8},{wch:10},{wch:16}
   ];
 
   // Style header row (bold)
@@ -600,6 +601,7 @@ export default function App() {
     const dir = rankSort.dir==="asc"?1:-1;
     const col = rankSort.col;
     if(col==="avg")   return dir*(a.avg-b.avg);
+    if(col==="pl")    return dir*((a.avg-(rentMap[a.device]||0))-(b.avg-(rentMap[b.device]||0)));
     if(col==="total") return dir*(a.total-b.total);
     if(col==="rr")    return dir*(a.rr-b.rr);
     if(col==="count") return dir*(a.count-b.count);
@@ -902,6 +904,7 @@ export default function App() {
                       {key:"rent",  label:"ค่าเช่า",    col:"rent",   align:"right"},
                       ...months.map((m,i)=>({key:m, label:ml(m)+(i===months.length-1&&elapsed<lastDays?" *":""), col:null, align:"right"})),
                       {key:"avg",   label:"AVG",        col:"avg",    align:"right"},
+                      {key:"pl",    label:"P/L",        col:"pl",     align:"right"},
                       {key:"total", label:"รวม",        col:"total",  align:"right"},
                       {key:"count", label:"ครั้ง",      col:"count",  align:"right"},
                       {key:"share", label:"สัดส่วน",    col:null,     align:"right"},
@@ -971,6 +974,9 @@ export default function App() {
                       {months.map((m,mi)=>cv(r,m,mi>0, mi===months.length-1&&elapsed<lastDays))}
                       <td style={{padding:"7px 9px",textAlign:"right",whiteSpace:"nowrap"}}>
                         <span style={{color:isLow?"#f87171":r.avg>=(rentMap[r.device]||0)?"#0d9488":"#5b7186",fontWeight:isLow?700:400}}>฿{fmt(r.avg)}</span>
+                      </td>
+                      <td style={{padding:"7px 9px",textAlign:"right",whiteSpace:"nowrap"}}>
+                        {(()=>{const pl=r.avg-(rentMap[r.device]||0);return <span style={{color:pl>=0?"#0d9488":"#ef4444",fontWeight:700}}>{pl>=0?"+":"−"}฿{fmt(Math.abs(pl))}</span>;})()}
                       </td>
                       <td style={{padding:"7px 9px",textAlign:"right",fontWeight:700,color:"#0d9488",whiteSpace:"nowrap"}}>฿{fmt(r.total)}</td>
                       <td style={{padding:"7px 9px",textAlign:"right",color:"#64748b"}}>{fmt(r.count)}</td>
