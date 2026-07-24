@@ -614,9 +614,14 @@ export default function App() {
   const grandTotal = useMemo(()=>rankData.reduce((s,r)=>s+r.total,0),[rankData]);
 
   // Count machines by P/L tier (AVG - rent) for the ranking overview boxes.
+  // Only machines that still have revenue in the latest month are counted —
+  // no revenue in the latest month means the machine has been removed.
   const plTiers = useMemo(()=>{
-    const t = { loss:0, t0:0, t1:0, t2:0, t3:0 };
+    const t = { installed:0, loss:0, t0:0, t1:0, t2:0, t3:0 };
     rankData.forEach(r=>{
+      const lastRev = lastM ? (r.bm[lastM]||0) : 0;
+      if (lastRev <= 0) return;              // removed machine — skip
+      t.installed++;
       const pl = Math.round(r.avg - (rentMap[r.device]||0));
       if (pl < 0) t.loss++;
       else if (pl <= 1000) t.t0++;
@@ -625,7 +630,7 @@ export default function App() {
       else t.t3++;
     });
     return t;
-  },[rankData,rentMap]);
+  },[rankData,rentMap,lastM]);
 
   const stackData = useMemo(()=>rankData.map(r=>{
     const o={device:r.device}; months.forEach(m=>{o[ml(m)]=r.bm[m]||0;}); return o;
@@ -879,19 +884,20 @@ export default function App() {
       {view==="ranking"&&(<>
         {/* P/L tier overview */}
         <div style={{marginBottom:14}}>
-          <div style={{fontSize:12,color:"#5b7186",fontWeight:600,marginBottom:8}}>ภาพรวมกำไร/ขาดทุน (P/L = AVG − ค่าเช่า)</div>
+          <div style={{fontSize:12,color:"#5b7186",fontWeight:600,marginBottom:8}}>ภาพรวมกำไร/ขาดทุน (P/L = AVG − ค่าเช่า){lastM?` · นับเฉพาะตู้ที่มียอดเดือน ${ml(lastM)}`:""}</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:10}}>
             {[
-              {key:"loss", label:"ขาดทุน",        sub:"P/L < 0",       color:"#dc2626", bg:"rgba(220,38,38,0.07)",  bd:"rgba(220,38,38,0.22)"},
-              {key:"t0",   label:"0 – 1,000",     sub:"บาท",           color:"#64748b", bg:"rgba(148,163,184,0.09)",bd:"rgba(148,163,184,0.25)"},
-              {key:"t1",   label:"1,001 – 2,000", sub:"บาท",           color:"#0d9488", bg:"rgba(45,212,191,0.08)", bd:"rgba(45,212,191,0.25)"},
-              {key:"t2",   label:"2,001 – 3,000", sub:"บาท",           color:"#0d9488", bg:"rgba(45,212,191,0.11)", bd:"rgba(45,212,191,0.3)"},
-              {key:"t3",   label:"มากกว่า 3,000", sub:"บาท",           color:"#0d9488", bg:"rgba(45,212,191,0.15)", bd:"rgba(45,212,191,0.38)"},
+              {key:"installed", label:"ตู้ที่ตั้งอยู่",  color:"#0d9488", bg:"rgba(13,148,136,0.14)", bd:"rgba(13,148,136,0.45)"},
+              {key:"loss",      label:"ขาดทุน",          color:"#dc2626", bg:"rgba(220,38,38,0.07)",  bd:"rgba(220,38,38,0.22)"},
+              {key:"t0",        label:"0 – 1,000",       color:"#64748b", bg:"rgba(148,163,184,0.09)",bd:"rgba(148,163,184,0.25)"},
+              {key:"t1",        label:"1,001 – 2,000",   color:"#0d9488", bg:"rgba(45,212,191,0.08)", bd:"rgba(45,212,191,0.25)"},
+              {key:"t2",        label:"2,001 – 3,000",   color:"#0d9488", bg:"rgba(45,212,191,0.11)", bd:"rgba(45,212,191,0.3)"},
+              {key:"t3",        label:"มากกว่า 3,000",   color:"#0d9488", bg:"rgba(45,212,191,0.15)", bd:"rgba(45,212,191,0.38)"},
             ].map(s=>(
               <div key={s.key} className="sc" style={{background:s.bg,border:`1px solid ${s.bd}`,textAlign:"center"}}>
                 <div style={{fontSize:11,fontWeight:600,color:s.color}}>{s.label}</div>
                 <div style={{fontSize:26,fontWeight:700,color:"#0f1824",lineHeight:1.2}}>{plTiers[s.key]}</div>
-                <div style={{fontSize:10,color:"#64748b"}}>ตู้ · {s.sub}</div>
+                <div style={{fontSize:10,color:"#64748b"}}>ตู้</div>
               </div>
             ))}
           </div>
