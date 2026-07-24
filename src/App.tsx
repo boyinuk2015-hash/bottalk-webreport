@@ -429,7 +429,7 @@ export default function App() {
       else b.neg++;
     });
     const lines = [
-      `📊 สรุปตู้ Bottalk — เดือน ${ml(sumMonth)}`,
+      `📊 สรุปตู้ GROSERI — เดือน ${ml(sumMonth)}`,
       `(สุทธิหักเช่า = ยอดขาย - ค่าเช่า)`,
       ``,
       `จำนวนตู้ทั้งหมด = ${total} ตู้`,
@@ -440,7 +440,6 @@ export default function App() {
     lines.push(`ตู้สุทธิ 1,000-1,999 = ${b.b12} ตู้`);
     lines.push(`ตู้สุทธิ ต่ำกว่า 1,000 = ${b.b01} ตู้`);
     lines.push(`ตู้สุทธิ ติดลบ (ขาดทุน) = ${b.neg} ตู้`);
-    lines.push(``, `รายได้รวม (ยอดขาย) = ฿${fmt(grossSum)}`, `สุทธิหักค่าเช่า = ฿${fmt(netSum)}`);
     return lines.join("\n");
   }, [sumMonth, devices, data, rentMap]);
   const copySummary = () => {
@@ -641,28 +640,29 @@ export default function App() {
     return [{name:"เงินสด",value:cash},{name:"QR",value:qr}];
   },[devData]);
 
+  // Status is computed for the selected month (sumMonth). For the current
+  // partial month we use the RunRate projection; otherwise the actual revenue.
+  // A machine with no revenue/RunRate that month is treated as removed.
   const decData = useMemo(()=>{
-    if(!rankData.length) return [];
+    if(!rankData.length || !sumMonth) return [];
+    const isLastOpen = sumMonth===lastM && elapsed<lastDays;
     return rankData.map(r=>{
-    const rent=rentMap[r.device]||0;
-    const avail=months.filter(m=>r.bm[m]>0);
-    const miss=avail.length>0&&!r.bm[lastM];
-    const cd=avail.length>=3&&r.bm[avail.at(-1)]<r.bm[avail.at(-2)]&&r.bm[avail.at(-2)]<r.bm[avail.at(-3)];
-    let status,reason;
-    if(miss)                          {status="nodata";  reason="ไม่มีข้อมูลเดือนล่าสุด — ตรวจสอบสถานะ";}
-    else if(r.rr>=rent&&r.avg>=rent)  {status="keep";    reason="Run Rate และ AVG ผ่านค่าเช่า";}
-    else if(r.rr>=rent||r.avg>=rent)  {status="watch";   reason=r.rr>=rent?"Run Rate ผ่าน แต่ AVG ยังต่ำกว่าค่าเช่า":"AVG ผ่าน แต่ Run Rate เดือนนี้ต่ำ";}
-    else if(cd)                       {status="relocate"; reason="ยอดลดติดต่อกัน 3 เดือนและต่ำกว่าค่าเช่า";}
-    else                              {status="relocate"; reason="AVG และ Run Rate ต่ำกว่าค่าเช่า";}
-    return {...r,rent,status,reason};
-  });
-  },[rankData,lastM,months,rentMap]);
+      const rent=rentMap[r.device]||0;
+      const monthVal = isLastOpen ? (r.rr||0) : (r.bm[sumMonth]||0);
+      let status,reason;
+      if(monthVal<=0)                        {status="removed";  reason=`ไม่มียอดเดือน ${ml(sumMonth)} — ถอดออกแล้ว`;}
+      else if(monthVal>=rent && r.avg>=rent) {status="keep";     reason="ยอดเดือนนี้และ AVG ผ่านค่าเช่า";}
+      else if(monthVal>=rent || r.avg>=rent) {status="watch";    reason=monthVal>=rent?"ยอดเดือนนี้ผ่าน แต่ AVG ต่ำกว่าค่าเช่า":"AVG ผ่าน แต่ยอดเดือนนี้ต่ำ";}
+      else                                   {status="relocate"; reason="ยอดเดือนนี้และ AVG ต่ำกว่าค่าเช่า";}
+      return {...r,rent,status,reason,monthVal};
+    });
+  },[rankData,sumMonth,lastM,elapsed,rentMap]);
 
   const grp = useMemo(()=>({
     keep:decData.filter(r=>r.status==="keep"),
     watch:decData.filter(r=>r.status==="watch"),
     relocate:decData.filter(r=>r.status==="relocate"),
-    nodata:decData.filter(r=>r.status==="nodata"),
+    removed:decData.filter(r=>r.status==="removed"),
   }),[decData]);
 
   // ── Styles ────────────────────────────────────────────────────────────────────
@@ -1081,29 +1081,30 @@ export default function App() {
             <div style={{fontSize:10.5,color:"#64748b",marginTop:6}}>แบ่งกลุ่มตามยอดสุทธิ (ยอดขาย − ค่าเช่า) · นับเฉพาะตู้ที่มียอดในเดือนนั้น · ตู้ที่ยังไม่มีข้อมูลค่าเช่าจะคิดค่าเช่า = 0 · แตะช่องเพื่อเลือกทั้งหมด แล้วคัดลอกไปวางในไลน์ได้เลย</div>
           </div>
 
+          <div style={{fontSize:12,color:"#5b7186",fontWeight:600,marginBottom:8}}>สถานะรายเครื่อง{sumMonth?` — เดือน ${ml(sumMonth)}`:""} (เลือกเดือนที่กล่องด้านบน)</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(145px,1fr))",gap:10,marginBottom:16}}>
             {[
               {key:"keep",    icon:"✅",label:"วางตู้ต่อ",      color:"#0d9488",bg:"rgba(45,212,191,0.07)",  bd:"rgba(45,212,191,0.2)"},
               {key:"watch",   icon:"👀",label:"เฝ้าดู",          color:"#d97706",bg:"rgba(251,191,36,0.07)",   bd:"rgba(251,191,36,0.2)"},
               {key:"relocate",icon:"🔴",label:"ย้ายออก",      color:"#dc2626",bg:"rgba(220,38,38,0.08)",    bd:"rgba(220,38,38,0.2)"},
-              {key:"nodata",  icon:"⚠️",label:"ตรวจสอบสถานะ",  color:"#64748b",bg:"rgba(148,163,184,0.07)",bd:"rgba(148,163,184,0.2)"},
+              {key:"removed", icon:"🚫",label:"ถอดออก",        color:"#64748b",bg:"rgba(148,163,184,0.07)",bd:"rgba(148,163,184,0.2)"},
             ].map(s=>(
               <div key={s.key} className="sc" style={{background:s.bg,border:`1px solid ${s.bd}`}}>
                 <div style={{fontSize:20,marginBottom:5}}>{s.icon}</div>
                 <div style={{fontSize:28,fontWeight:700,color:s.color}}>{grp[s.key].length}</div>
                 <div style={{fontSize:13,color:"#64748b",marginTop:2}}>{s.label}</div>
-                <div style={{fontSize:10,color:"#64748b"}}>เครื่อง</div>
+                <div style={{fontSize:10,color:"#64748b"}}>ตู้</div>
               </div>
             ))}
           </div>
 
           <div className="card" style={{marginBottom:12,padding:"11px 14px"}}>
-            <div style={{fontSize:11,color:"#64748b",fontWeight:600,marginBottom:7}}>เกณฑ์การตัดสิน</div>
+            <div style={{fontSize:11,color:"#64748b",fontWeight:600,marginBottom:7}}>เกณฑ์การตัดสิน (ยอดเดือนที่เลือก · เดือนปัจจุบันใช้ RunRate)</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(195px,1fr))",gap:5,fontSize:11,color:"#64748b"}}>
-              <span>✅ <b style={{color:"#0d9488"}}>วางตู้ต่อ</b> — Run Rate ≥ ค่าเช่า และ AVG ≥ 80%</span>
+              <span>✅ <b style={{color:"#0d9488"}}>วางตู้ต่อ</b> — ยอดเดือนนี้ ≥ ค่าเช่า และ AVG ≥ ค่าเช่า</span>
               <span>👀 <b style={{color:"#f59e0b"}}>เฝ้าดู</b> — ผ่านเกณฑ์อย่างใดอย่างหนึ่ง</span>
-              <span>🔴 <b style={{color:"#ef4444"}}>ย้ายออก</b> — ทั้ง Run Rate และ AVG ต่ำกว่าค่าเช่า</span>
-              <span>⚠️ <b style={{color:"#64748b"}}>ตรวจสอบ</b> — ไม่มีข้อมูลเดือนล่าสุด</span>
+              <span>🔴 <b style={{color:"#ef4444"}}>ย้ายออก</b> — ทั้งยอดเดือนนี้และ AVG ต่ำกว่าค่าเช่า</span>
+              <span>🚫 <b style={{color:"#64748b"}}>ถอดออก</b> — ไม่มียอดในเดือนที่เลือก (ไม่นับรวม)</span>
             </div>
           </div>
 
@@ -1111,7 +1112,7 @@ export default function App() {
             {key:"relocate",label:"🔴 ย้ายออก",        color:"#f87171",bd:"rgba(220,38,38,0.3)"},
             {key:"watch",   label:"👀 เฝ้าดู / พิจารณา",  color:"#fbbf24",bd:"rgba(251,191,36,0.3)"},
             {key:"keep",    label:"✅ วางตู้ต่อ",          color:"#0d9488",bd:"#0d9488"},
-            {key:"nodata",  label:"⚠️ ตรวจสอบสถานะ",     color:"#64748b",bd:"rgba(148,163,184,0.15)"},
+            {key:"removed", label:"🚫 ถอดออก (ไม่มียอดเดือนนี้)", color:"#64748b",bd:"rgba(148,163,184,0.15)"},
           ].map(({key,label,color,bd})=>{
             const g=grp[key]; if(!g.length) return null;
             return (
@@ -1124,7 +1125,7 @@ export default function App() {
                   <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
                     <thead>
                       <tr style={{borderBottom:"1px solid #e6ebf1"}}>
-                        {[["เครื่อง","left"],["สถานที่","left"],["วันติดตั้ง","center"],["ค่าเช่า","right"],["AVG","right"],["Run Rate","right"],["เหตุผล","left"]].map(([h,a])=>(
+                        {[["เครื่อง","left"],["สถานที่","left"],["วันติดตั้ง","center"],["ค่าเช่า","right"],["AVG","right"],[`ยอด ${ml(sumMonth)}`,"right"],["เหตุผล","left"]].map(([h,a])=>(
                           <th key={h} style={{padding:"6px 9px",textAlign:a,color:"#64748b",fontWeight:600}}>{h}</th>
                         ))}
                       </tr>
@@ -1141,7 +1142,7 @@ export default function App() {
                             <span style={{color:r.avg>=r.rent?"#0d9488":"#ef4444",fontWeight:600}}>฿{fmt(r.avg)}</span>
                           </td>
                           <td style={{padding:"7px 9px",textAlign:"right",whiteSpace:"nowrap"}}>
-                            {r.rr>0?<span style={{color:r.rr>=r.rent?"#0d9488":"#ef4444",fontWeight:600}}>฿{fmt(r.rr)}</span>:<span style={{color:"#d8e0e8"}}>—</span>}
+                            {r.monthVal>0?<span style={{color:r.monthVal>=r.rent?"#0d9488":"#ef4444",fontWeight:600}}>฿{fmt(r.monthVal)}</span>:<span style={{color:"#d8e0e8"}}>—</span>}
                           </td>
                           <td style={{padding:"7px 9px",color:"#64748b",fontSize:11}}>{r.reason}</td>
                         </tr>
